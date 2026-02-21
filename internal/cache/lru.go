@@ -1,8 +1,8 @@
 package cache
 
 import (
-	"github.com/chatwoot/dubly/internal/models"
 	lru "github.com/hashicorp/golang-lru/v2"
+	"github.com/scmmishra/dubly/internal/models"
 )
 
 type LinkCache struct {

@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"testing"
 
-	"github.com/chatwoot/dubly/internal/db"
+	"github.com/scmmishra/dubly/internal/db"
 )
 
 func testDB(t *testing.T) *sql.DB {

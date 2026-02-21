@@ -3,7 +3,7 @@ package cache
 import (
 	"testing"
 
-	"github.com/chatwoot/dubly/internal/models"
+	"github.com/scmmishra/dubly/internal/models"
 )
 
 func TestCache_SetAndGet(t *testing.T) {

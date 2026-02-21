@@ -10,10 +10,10 @@ import (
 
 	"github.com/go-chi/chi/v5"
 
-	"github.com/chatwoot/dubly/internal/cache"
-	"github.com/chatwoot/dubly/internal/config"
-	"github.com/chatwoot/dubly/internal/models"
-	"github.com/chatwoot/dubly/internal/slug"
+	"github.com/scmmishra/dubly/internal/cache"
+	"github.com/scmmishra/dubly/internal/config"
+	"github.com/scmmishra/dubly/internal/models"
+	"github.com/scmmishra/dubly/internal/slug"
 )
 
 const maxBodySize = 1 << 20 // 1 MB

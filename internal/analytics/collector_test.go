@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/chatwoot/dubly/internal/db"
-	"github.com/chatwoot/dubly/internal/geo"
+	"github.com/scmmishra/dubly/internal/db"
+	"github.com/scmmishra/dubly/internal/geo"
 )
 
 func testDB(t *testing.T) *sql.DB {

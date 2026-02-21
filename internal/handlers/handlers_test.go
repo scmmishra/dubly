@@ -11,12 +11,12 @@ import (
 
 	"github.com/go-chi/chi/v5"
 
-	"github.com/chatwoot/dubly/internal/analytics"
-	"github.com/chatwoot/dubly/internal/cache"
-	"github.com/chatwoot/dubly/internal/config"
-	"github.com/chatwoot/dubly/internal/db"
-	"github.com/chatwoot/dubly/internal/geo"
-	"github.com/chatwoot/dubly/internal/handlers"
+	"github.com/scmmishra/dubly/internal/analytics"
+	"github.com/scmmishra/dubly/internal/cache"
+	"github.com/scmmishra/dubly/internal/config"
+	"github.com/scmmishra/dubly/internal/db"
+	"github.com/scmmishra/dubly/internal/geo"
+	"github.com/scmmishra/dubly/internal/handlers"
 )
 
 const testPassword = "test-secret"
@@ -84,7 +84,9 @@ func createLink(t *testing.T, r *chi.Mux, slug, domain, dest string) int64 {
 	if rr.Code != http.StatusCreated {
 		t.Fatalf("createLink: status = %d, body = %s", rr.Code, rr.Body.String())
 	}
-	var link struct{ ID int64 `json:"id"` }
+	var link struct {
+		ID int64 `json:"id"`
+	}
 	if err := json.NewDecoder(rr.Body).Decode(&link); err != nil {
 		t.Fatal(err)
 	}

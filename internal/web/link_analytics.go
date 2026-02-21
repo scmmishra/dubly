@@ -6,7 +6,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 
-	"github.com/chatwoot/dubly/internal/models"
+	"github.com/scmmishra/dubly/internal/models"
 )
 
 type AnalyticsData struct {

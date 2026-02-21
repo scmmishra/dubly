@@ -8,8 +8,8 @@ import (
 
 	"github.com/go-chi/chi/v5"
 
-	"github.com/chatwoot/dubly/internal/cache"
-	"github.com/chatwoot/dubly/internal/config"
+	"github.com/scmmishra/dubly/internal/cache"
+	"github.com/scmmishra/dubly/internal/config"
 )
 
 type AdminHandler struct {

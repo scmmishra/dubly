@@ -12,13 +12,13 @@ import (
 
 	"github.com/go-chi/chi/v5"
 
-	"github.com/chatwoot/dubly/internal/analytics"
-	"github.com/chatwoot/dubly/internal/cache"
-	"github.com/chatwoot/dubly/internal/config"
-	"github.com/chatwoot/dubly/internal/db"
-	"github.com/chatwoot/dubly/internal/geo"
-	"github.com/chatwoot/dubly/internal/models"
-	"github.com/chatwoot/dubly/internal/web"
+	"github.com/scmmishra/dubly/internal/analytics"
+	"github.com/scmmishra/dubly/internal/cache"
+	"github.com/scmmishra/dubly/internal/config"
+	"github.com/scmmishra/dubly/internal/db"
+	"github.com/scmmishra/dubly/internal/geo"
+	"github.com/scmmishra/dubly/internal/models"
+	"github.com/scmmishra/dubly/internal/web"
 )
 
 const testPassword = "test-secret"
@@ -179,7 +179,6 @@ func TestProtectedRoute_RedirectsWithoutSession(t *testing.T) {
 		t.Errorf("Location = %q, want /admin/login", loc)
 	}
 }
-
 
 // === Combined Dashboard + Links Tests ===
 

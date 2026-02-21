@@ -7,8 +7,8 @@ import (
 
 	"github.com/go-chi/chi/v5"
 
-	"github.com/chatwoot/dubly/internal/models"
-	"github.com/chatwoot/dubly/internal/slug"
+	"github.com/scmmishra/dubly/internal/models"
+	"github.com/scmmishra/dubly/internal/slug"
 )
 
 const linksPerPage = 12

@@ -7,9 +7,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/chatwoot/dubly/internal/analytics"
-	"github.com/chatwoot/dubly/internal/cache"
-	"github.com/chatwoot/dubly/internal/models"
+	"github.com/scmmishra/dubly/internal/analytics"
+	"github.com/scmmishra/dubly/internal/cache"
+	"github.com/scmmishra/dubly/internal/models"
 )
 
 type RedirectHandler struct {

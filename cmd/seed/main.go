@@ -7,8 +7,8 @@ import (
 	"os"
 	"time"
 
-	"github.com/chatwoot/dubly/internal/db"
-	"github.com/chatwoot/dubly/internal/models"
+	"github.com/scmmishra/dubly/internal/db"
+	"github.com/scmmishra/dubly/internal/models"
 )
 
 type seedLink struct {

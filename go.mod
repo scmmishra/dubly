@@ -1,4 +1,4 @@
-module github.com/chatwoot/dubly
+module github.com/scmmishra/dubly
 
 go 1.24.0
 

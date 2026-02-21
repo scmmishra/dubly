@@ -8,8 +8,8 @@ import (
 
 	"github.com/mssola/useragent"
 
-	"github.com/chatwoot/dubly/internal/geo"
-	"github.com/chatwoot/dubly/internal/models"
+	"github.com/scmmishra/dubly/internal/geo"
+	"github.com/scmmishra/dubly/internal/models"
 )
 
 type RawClick struct {
