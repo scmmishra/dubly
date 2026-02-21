@@ -59,3 +59,7 @@ depends = ["lint", "test"]
 [tasks.clean]
 description = "Remove build artifacts"
 run = "rm -f dubly coverage.out"
+
+[tasks.serve]
+description = "Run dev server"
+run = "DUBLY_PASSWORD=test DUBLY_DOMAINS=localhost go run ./cmd/server"
