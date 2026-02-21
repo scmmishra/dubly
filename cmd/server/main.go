@@ -69,7 +69,7 @@ func main() {
 		r.Post("/links", linkHandler.Create)
 		r.Get("/links", linkHandler.List)
 		r.Get("/links/{id}", linkHandler.Get)
-		r.Put("/links/{id}", linkHandler.Update)
+		r.Patch("/links/{id}", linkHandler.Update)
 		r.Delete("/links/{id}", linkHandler.Delete)
 	})
 

@@ -65,7 +65,7 @@ curl http://localhost:8080/api/links/1 \
 ### Update a link
 
 ```bash
-curl -X PUT http://localhost:8080/api/links/1 \
+curl -X PATCH http://localhost:8080/api/links/1 \
   -H "X-API-Key: your-secret-key" \
   -H "Content-Type: application/json" \
   -d '{"destination": "https://example.com/new-url"}'
