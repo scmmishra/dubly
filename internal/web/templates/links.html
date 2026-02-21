@@ -6,34 +6,37 @@
     <a href="/admin/links/new" class="btn btn-primary">New link</a>
 </div>
 
-<div class="al-hero">
-    <div class="al-hero-stat">
-        <span class="al-hero-number mono">{{formatNum .TotalLinks}}</span>
-        <span class="al-hero-label">Active links</span>
-    </div>
-    <div class="al-hero-stat">
-        <span class="al-hero-number mono">{{formatNum .ClicksToday}}</span>
-        <span class="al-hero-label">Today</span>
-    </div>
-    <div class="al-hero-stat">
-        <span class="al-hero-number mono">{{formatNum .ClicksAllTime}}</span>
-        <span class="al-hero-label">Total clicks</span>
-    </div>
-</div>
-
-{{if .TopReferrers}}
-<div class="card al-breakdown" style="margin-bottom: 1.5rem;">
-    <h2 class="card-title">Top referrers</h2>
-    <div class="al-rows">
-        {{range .TopReferrers}}
-        <div class="al-row">
-            <span class="al-row-label mono">{{.Domain}}</span>
-            <span class="al-row-count mono">{{formatNum .Count}}</span>
+<div class="dash-grid">
+    <div class="dash-stats">
+        <div class="dash-stat">
+            <span class="dash-stat-label">Active links</span>
+            <span class="dash-stat-number mono">{{formatNum .TotalLinks}}</span>
         </div>
+        <div class="dash-stat">
+            <span class="dash-stat-label">Today</span>
+            <span class="dash-stat-number mono">{{formatNum .ClicksToday}}</span>
+        </div>
+        <div class="dash-stat">
+            <span class="dash-stat-label">Total clicks</span>
+            <span class="dash-stat-number mono">{{formatNum .ClicksAllTime}}</span>
+        </div>
+    </div>
+    <div class="dash-referrers">
+        <h2 class="card-title">Top referrers</h2>
+        {{if .TopReferrers}}
+        <div class="al-rows">
+            {{range .TopReferrers}}
+            <div class="al-row">
+                <span class="al-row-label mono">{{.Domain}}</span>
+                <span class="al-row-count mono">{{formatNum .Count}}</span>
+            </div>
+            {{end}}
+        </div>
+        {{else}}
+        <p class="empty-state">No referrer data yet.</p>
         {{end}}
     </div>
 </div>
-{{end}}
 
 <div class="search-bar">
     <input
