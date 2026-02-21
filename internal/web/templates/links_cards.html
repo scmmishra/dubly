@@ -1,0 +1,69 @@
+{{define "cards"}}
+{{if .Links}}
+<div class="card-grid">
+    {{range .Links}}
+    <div class="card link-card{{if not .Link.IsActive}} link-inactive{{end}}" id="link-{{.Link.ID}}">
+        <div class="link-card-header">
+            <a href="/admin/links/{{.Link.ID}}/analytics" class="mono link-url">{{.Link.ShortURL}}</a>
+            {{if not .Link.IsActive}}<span class="badge badge-inactive">inactive</span>{{end}}
+        </div>
+        <div class="link-card-dest">
+            <span class="text-muted" title="{{.Link.Destination}}">{{truncate .Link.Destination 60}}</span>
+        </div>
+        {{if .Link.Title}}
+        <div class="link-card-title">{{.Link.Title}}</div>
+        {{end}}
+        <div class="link-card-footer">
+            <span class="mono text-muted">{{formatNum .ClickCount}} clicks</span>
+            <span class="text-muted">{{timeAgo .Link.CreatedAt}}</span>
+        </div>
+        <div class="link-card-actions">
+            <a href="/admin/links/{{.Link.ID}}/edit" class="btn btn-ghost btn-sm">Edit</a>
+            <a href="/admin/links/{{.Link.ID}}/analytics" class="btn btn-ghost btn-sm">Analytics</a>
+            {{if .Link.IsActive}}
+            <button
+                class="btn btn-destructive btn-sm"
+                hx-delete="/admin/links/{{.Link.ID}}"
+                hx-confirm="Delete this link?"
+                hx-target="#link-{{.Link.ID}}"
+                hx-swap="outerHTML swap:0.3s"
+            >Delete</button>
+            {{end}}
+        </div>
+    </div>
+    {{end}}
+</div>
+
+{{if gt .TotalPages 1}}
+<div class="pagination">
+    {{if gt .Page 1}}
+    <a href="/admin/links?page={{sub .Page 1}}{{if .Search}}&search={{.Search}}{{end}}"
+       hx-get="/admin/links?page={{sub .Page 1}}{{if .Search}}&search={{.Search}}{{end}}"
+       hx-target="#link-cards"
+       hx-push-url="true"
+       class="btn btn-ghost btn-sm">&larr; Prev</a>
+    {{end}}
+
+    <span class="pagination-info">Page {{.Page}} of {{.TotalPages}}</span>
+
+    {{if lt .Page .TotalPages}}
+    <a href="/admin/links?page={{add .Page 1}}{{if .Search}}&search={{.Search}}{{end}}"
+       hx-get="/admin/links?page={{add .Page 1}}{{if .Search}}&search={{.Search}}{{end}}"
+       hx-target="#link-cards"
+       hx-push-url="true"
+       class="btn btn-ghost btn-sm">Next &rarr;</a>
+    {{end}}
+</div>
+{{end}}
+
+{{else}}
+<div class="empty-state-large">
+    {{if .Search}}
+    <p>No links match "{{.Search}}".</p>
+    {{else}}
+    <p>No links yet.</p>
+    <a href="/admin/links/new" class="btn btn-primary">Create your first link</a>
+    {{end}}
+</div>
+{{end}}
+{{end}}

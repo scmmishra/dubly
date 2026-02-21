@@ -18,6 +18,7 @@ import (
 	"github.com/chatwoot/dubly/internal/db"
 	"github.com/chatwoot/dubly/internal/geo"
 	"github.com/chatwoot/dubly/internal/handlers"
+	"github.com/chatwoot/dubly/internal/web"
 )
 
 func main() {
@@ -72,6 +73,13 @@ func main() {
 		r.Patch("/links/{id}", linkHandler.Update)
 		r.Delete("/links/{id}", linkHandler.Delete)
 	})
+
+	// Admin UI
+	adminHandler, err := web.NewAdminHandler(database, cfg, linkCache)
+	if err != nil {
+		log.Fatalf("admin: %v", err)
+	}
+	adminHandler.RegisterRoutes(r)
 
 	// All other routes → redirect handler
 	r.NotFound(redirectHandler.ServeHTTP)

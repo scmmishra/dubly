@@ -1,0 +1,70 @@
+{{define "title"}}Edit link{{end}}
+
+{{define "content"}}
+<div class="page-header">
+    <h1>Edit link</h1>
+</div>
+
+<div class="card form-card">
+    <form method="POST" action="/admin/links/{{.Link.ID}}">
+        <div class="field">
+            <label for="destination" class="label">Destination URL</label>
+            <input type="url" id="destination" name="destination" class="input mono"
+                   value="{{index .Values "destination"}}" required>
+            {{if index .Errors "destination"}}
+            <p class="field-error">{{index .Errors "destination"}}</p>
+            {{end}}
+        </div>
+
+        <div class="field-row">
+            <div class="field field-grow">
+                <label for="domain" class="label">Domain</label>
+                <select id="domain" name="domain" class="input">
+                    {{range .Domains}}
+                    <option value="{{.}}" {{if eq . (index $.Values "domain")}}selected{{end}}>{{.}}</option>
+                    {{end}}
+                </select>
+                {{if index .Errors "domain"}}
+                <p class="field-error">{{index .Errors "domain"}}</p>
+                {{end}}
+            </div>
+
+            <div class="field field-grow">
+                <label for="slug" class="label">Slug</label>
+                <input type="text" id="slug" name="slug" class="input mono"
+                       value="{{index .Values "slug"}}" required>
+                {{if index .Errors "slug"}}
+                <p class="field-error">{{index .Errors "slug"}}</p>
+                {{end}}
+            </div>
+        </div>
+
+        <div class="field">
+            <label class="label">Short URL</label>
+            <div class="mono text-muted">{{.Link.ShortURL}}</div>
+        </div>
+
+        <div class="field">
+            <label for="title" class="label">Title</label>
+            <input type="text" id="title" name="title" class="input"
+                   value="{{index .Values "title"}}">
+        </div>
+
+        <div class="field">
+            <label for="tags" class="label">Tags</label>
+            <input type="text" id="tags" name="tags" class="input"
+                   value="{{index .Values "tags"}}">
+        </div>
+
+        <div class="field">
+            <label for="notes" class="label">Notes</label>
+            <textarea id="notes" name="notes" class="input textarea" rows="3">{{index .Values "notes"}}</textarea>
+        </div>
+
+        <div class="form-actions">
+            <a href="/admin/links" class="btn btn-ghost">Cancel</a>
+            <button type="submit" class="btn btn-primary">Save changes</button>
+        </div>
+    </form>
+</div>
+{{end}}

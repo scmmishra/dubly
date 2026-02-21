@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{template "title" .}} — Dubly</title>
+    <link rel="stylesheet" href="/admin/static/css/style.css">
+    <script src="/admin/static/js/htmx.min.js" defer></script>
+</head>
+<body>
+    <nav class="nav">
+        <div class="container nav-inner">
+            <a href="/admin" class="nav-brand">dubly</a>
+            <div class="nav-links">
+                <a href="/admin" class="nav-link">Dashboard</a>
+                <a href="/admin/links" class="nav-link">Links</a>
+                <form method="POST" action="/admin/logout" class="nav-logout">
+                    <button type="submit" class="btn btn-ghost">Log out</button>
+                </form>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container main">
+        {{if .Flash}}
+        <div class="flash flash-{{.Flash.Type}}" role="alert">
+            {{.Flash.Message}}
+        </div>
+        {{end}}
+
+        {{template "content" .}}
+    </main>
+</body>
+</html>

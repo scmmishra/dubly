@@ -1,0 +1,72 @@
+{{define "title"}}Analytics{{end}}
+
+{{define "content"}}
+<div class="page-header">
+    <div>
+        <h1>Analytics</h1>
+        <p class="page-subtitle mono">{{.Link.ShortURL}}</p>
+        {{if .Link.Title}}<p class="text-muted">{{.Link.Title}}</p>{{end}}
+    </div>
+    <div class="page-actions">
+        <a href="/admin/links/{{.Link.ID}}/edit" class="btn btn-ghost">Edit</a>
+        <a href="/admin/links" class="btn btn-ghost">Back to links</a>
+    </div>
+</div>
+
+<div class="stat-grid">
+    <div class="stat-card">
+        <div class="stat-label">Total clicks</div>
+        <div class="stat-value mono">{{formatNum .TotalClicks}}</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Destination</div>
+        <div class="stat-value-sm mono"><a href="{{.Link.Destination}}" target="_blank" rel="noopener">{{truncate .Link.Destination 50}}</a></div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Created</div>
+        <div class="stat-value-sm">{{timeAgo .Link.CreatedAt}}</div>
+    </div>
+</div>
+
+<div class="dashboard-grid">
+    <div class="card">
+        <h2 class="card-title">Top referrers</h2>
+        {{if .TopReferrers}}
+        <table class="table-mini">
+            <tbody>
+                {{range .TopReferrers}}
+                <tr>
+                    <td class="mono">{{.Domain}}</td>
+                    <td class="text-right mono">{{formatNum .Count}}</td>
+                </tr>
+                {{end}}
+            </tbody>
+        </table>
+        {{else}}
+        <p class="empty-state">No referrer data yet.</p>
+        {{end}}
+    </div>
+
+    <div class="card">
+        <h2 class="card-title">Top countries</h2>
+        {{if .TopCountries}}
+        <table class="table-mini">
+            <tbody>
+                {{range .TopCountries}}
+                <tr>
+                    <td>{{.Country}}</td>
+                    <td class="text-right mono">{{formatNum .Count}}</td>
+                </tr>
+                {{end}}
+            </tbody>
+        </table>
+        {{else}}
+        <p class="empty-state">No country data yet.</p>
+        {{end}}
+    </div>
+</div>
+
+{{if not .Link.IsActive}}
+<div class="flash flash-error">This link is inactive and returns HTTP 410 (Gone).</div>
+{{end}}
+{{end}}

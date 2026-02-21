@@ -1,0 +1,70 @@
+{{define "title"}}New link{{end}}
+
+{{define "content"}}
+<div class="page-header">
+    <h1>New link</h1>
+</div>
+
+<div class="card form-card">
+    <form method="POST" action="/admin/links">
+        <div class="field">
+            <label for="destination" class="label">Destination URL</label>
+            <input type="url" id="destination" name="destination" class="input mono"
+                   placeholder="https://example.com/long-page"
+                   value="{{index .Values "destination"}}" required>
+            {{if index .Errors "destination"}}
+            <p class="field-error">{{index .Errors "destination"}}</p>
+            {{end}}
+        </div>
+
+        <div class="field-row">
+            <div class="field field-grow">
+                <label for="domain" class="label">Domain</label>
+                <select id="domain" name="domain" class="input">
+                    {{range .Domains}}
+                    <option value="{{.}}" {{if eq . (index $.Values "domain")}}selected{{end}}>{{.}}</option>
+                    {{end}}
+                </select>
+                {{if index .Errors "domain"}}
+                <p class="field-error">{{index .Errors "domain"}}</p>
+                {{end}}
+            </div>
+
+            <div class="field field-grow">
+                <label for="slug" class="label">Slug <span class="text-muted">(optional)</span></label>
+                <input type="text" id="slug" name="slug" class="input mono"
+                       placeholder="auto-generated"
+                       value="{{index .Values "slug"}}">
+                {{if index .Errors "slug"}}
+                <p class="field-error">{{index .Errors "slug"}}</p>
+                {{end}}
+            </div>
+        </div>
+
+        <div class="field">
+            <label for="title" class="label">Title <span class="text-muted">(optional)</span></label>
+            <input type="text" id="title" name="title" class="input"
+                   placeholder="A friendly name for this link"
+                   value="{{index .Values "title"}}">
+        </div>
+
+        <div class="field">
+            <label for="tags" class="label">Tags <span class="text-muted">(optional)</span></label>
+            <input type="text" id="tags" name="tags" class="input"
+                   placeholder="campaign, social"
+                   value="{{index .Values "tags"}}">
+        </div>
+
+        <div class="field">
+            <label for="notes" class="label">Notes <span class="text-muted">(optional)</span></label>
+            <textarea id="notes" name="notes" class="input textarea" rows="3"
+                      placeholder="Internal notes...">{{index .Values "notes"}}</textarea>
+        </div>
+
+        <div class="form-actions">
+            <a href="/admin/links" class="btn btn-ghost">Cancel</a>
+            <button type="submit" class="btn btn-primary">Create link</button>
+        </div>
+    </form>
+</div>
+{{end}}
