@@ -1,16 +1,16 @@
 # Dubly
 
-A single-user, SQLite-backed link shortener with a built-in admin UI, in-memory analytics buffering, multiple custom domain support, and MaxMind geo lookup.
+A simple, single-user URL shortener. Built with Go and SQLite. Comes with an admin UI, click analytics, and support for multiple custom domains.
 
-## Installation
+## Install
 
-The install script sets up everything on a fresh Ubuntu/Debian server: Go, Caddy (reverse proxy with auto-HTTPS), systemd service, firewall rules, and optional Litestream S3 backups.
+Run the install script on a fresh Ubuntu/Debian server. It handles everything — Go, Caddy for HTTPS, systemd, firewall, and optional S3 backups.
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/scmmishra/dubly/main/scripts/install.sh | sudo bash
 ```
 
-Or clone first and run locally:
+Or clone and run:
 
 ```bash
 git clone https://github.com/scmmishra/dubly.git
@@ -18,9 +18,9 @@ cd dubly
 sudo bash scripts/install.sh
 ```
 
-The script will interactively prompt for your domain(s), API password, and optional S3/GeoIP configuration.
+The script asks for your domain(s), API password, and optional S3/GeoIP settings.
 
-To update an existing installation:
+To update later:
 
 ```bash
 sudo /opt/dubly/scripts/install.sh --update
@@ -38,19 +38,19 @@ DUBLY_DOMAINS=short.io,go.example.com \
 
 ## Configuration
 
-All configuration is via environment variables.
+Everything is configured through environment variables.
 
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
-| `DUBLY_PASSWORD` | Yes | — | API key for authenticating requests |
-| `DUBLY_DOMAINS` | Yes | — | Comma-separated allowed domains |
-| `DUBLY_PORT` | No | `8080` | Server listen port |
-| `DUBLY_DB_PATH` | No | `./dubly.db` | SQLite database file path |
-| `DUBLY_APP_NAME` | No | `Dubly` | Display name used in the admin UI |
-| `DUBLY_GEOIP_PATH` | No | — | Path to GeoLite2-City.mmdb (geo disabled if unset) |
-| `DUBLY_FLUSH_INTERVAL` | No | `30s` | Analytics flush interval |
-| `DUBLY_BUFFER_SIZE` | No | `50000` | Analytics channel buffer capacity |
-| `DUBLY_CACHE_SIZE` | No | `10000` | LRU cache max entries |
+| `DUBLY_PASSWORD` | Yes | — | API password |
+| `DUBLY_DOMAINS` | Yes | — | Allowed domains, comma-separated |
+| `DUBLY_PORT` | No | `8080` | Server port |
+| `DUBLY_DB_PATH` | No | `./dubly.db` | SQLite database path |
+| `DUBLY_APP_NAME` | No | `Dubly` | Name shown in the admin UI |
+| `DUBLY_GEOIP_PATH` | No | — | Path to GeoLite2-City.mmdb for geo lookup |
+| `DUBLY_FLUSH_INTERVAL` | No | `30s` | How often analytics are saved to disk |
+| `DUBLY_BUFFER_SIZE` | No | `50000` | Analytics buffer size |
+| `DUBLY_CACHE_SIZE` | No | `10000` | Max cached redirects |
 
 ## API
 
@@ -71,7 +71,7 @@ curl -X POST http://localhost:8080/api/links \
   }'
 ```
 
-`slug` is optional — a random 6-character Base62 slug is generated if omitted.
+`slug` is optional — a random 6-character slug is generated if omitted.
 
 ### List links
 
@@ -96,18 +96,18 @@ curl -X PATCH http://localhost:8080/api/links/1 \
   -d '{"destination": "https://example.com/new-url"}'
 ```
 
-### Delete a link (soft delete)
+### Delete a link
 
 ```bash
 curl -X DELETE http://localhost:8080/api/links/1 \
   -H "X-API-Key: your-secret-key"
 ```
 
-Soft-deleted links return `410 Gone` on redirect.
+Deleted links return `410 Gone` on redirect.
 
 ## Redirects
 
-Any request not under `/api/` or `/admin/` is treated as a redirect. The `Host` header determines the domain and the path determines the slug.
+Requests that don't match `/api/` or `/admin/` are treated as redirects. The domain comes from the `Host` header, the slug from the path.
 
 ```
 https://short.io/custom-slug → 302 → https://example.com/some/long/url
@@ -115,8 +115,8 @@ https://short.io/custom-slug → 302 → https://example.com/some/long/url
 
 ## Analytics
 
-Click events are buffered in memory and flushed to SQLite in batches. Each click records:
+Clicks are buffered in memory and saved to SQLite in batches. Each click records:
 
 - Timestamp, IP, referer
-- Browser, OS, device type (parsed from User-Agent)
-- Country, city, region, coordinates (from MaxMind GeoLite2, if configured)
+- Browser, OS, device type
+- Country, city, region, coordinates (requires [GeoLite2](https://www.maxmind.com/en/geolite2/signup))
