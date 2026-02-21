@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"database/sql"
+	"net"
 	"net/http"
 	"strings"
 	"time"
@@ -20,9 +21,10 @@ type RedirectHandler struct {
 func (h *RedirectHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	host := r.Host
 	// Strip port if present
-	if idx := strings.LastIndex(host, ":"); idx != -1 {
-		host = host[:idx]
+	if h, _, err := net.SplitHostPort(host); err == nil {
+		host = h
 	}
+	host = strings.ToLower(host)
 
 	slug := strings.TrimPrefix(r.URL.Path, "/")
 	if slug == "" {
@@ -52,15 +54,10 @@ func (h *RedirectHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Extract client IP
-	ip := r.Header.Get("X-Forwarded-For")
-	if ip != "" {
-		ip = strings.TrimSpace(strings.Split(ip, ",")[0])
-	} else {
+	// chi's RealIP middleware already sets RemoteAddr from X-Forwarded-For/X-Real-IP
+	ip, _, _ := net.SplitHostPort(r.RemoteAddr)
+	if ip == "" {
 		ip = r.RemoteAddr
-		if idx := strings.LastIndex(ip, ":"); idx != -1 {
-			ip = ip[:idx]
-		}
 	}
 
 	h.Collector.Push(analytics.RawClick{

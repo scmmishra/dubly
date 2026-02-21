@@ -3,8 +3,10 @@ package handlers
 import (
 	"database/sql"
 	"encoding/json"
+	"io"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/go-chi/chi/v5"
 
@@ -13,6 +15,8 @@ import (
 	"github.com/chatwoot/dubly/internal/models"
 	"github.com/chatwoot/dubly/internal/slug"
 )
+
+const maxBodySize = 1 << 20 // 1 MB
 
 type LinkHandler struct {
 	DB    *sql.DB
@@ -29,6 +33,15 @@ type createLinkRequest struct {
 	Notes       string `json:"notes"`
 }
 
+type updateLinkRequest struct {
+	Slug        string  `json:"slug"`
+	Domain      string  `json:"domain"`
+	Destination string  `json:"destination"`
+	Title       *string `json:"title"`
+	Tags        *string `json:"tags"`
+	Notes       *string `json:"notes"`
+}
+
 type listResponse struct {
 	Links  []models.Link `json:"links"`
 	Total  int           `json:"total"`
@@ -38,7 +51,7 @@ type listResponse struct {
 
 func (h *LinkHandler) Create(w http.ResponseWriter, r *http.Request) {
 	var req createLinkRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+	if err := decodeJSON(r, &req); err != nil {
 		jsonError(w, "invalid JSON", http.StatusBadRequest)
 		return
 	}
@@ -51,6 +64,7 @@ func (h *LinkHandler) Create(w http.ResponseWriter, r *http.Request) {
 		jsonError(w, "domain is required", http.StatusBadRequest)
 		return
 	}
+	req.Domain = strings.ToLower(req.Domain)
 	if !h.Cfg.IsDomainAllowed(req.Domain) {
 		jsonError(w, "domain not allowed", http.StatusBadRequest)
 		return
@@ -59,7 +73,11 @@ func (h *LinkHandler) Create(w http.ResponseWriter, r *http.Request) {
 	// Generate slug if not provided, with collision retry
 	if req.Slug == "" {
 		for range 10 {
-			candidate := slug.Generate()
+			candidate, err := slug.Generate()
+			if err != nil {
+				jsonError(w, "internal error", http.StatusInternalServerError)
+				return
+			}
 			exists, err := models.SlugExists(h.DB, candidate, req.Domain)
 			if err != nil {
 				jsonError(w, "internal error", http.StatusInternalServerError)
@@ -86,7 +104,11 @@ func (h *LinkHandler) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := models.CreateLink(h.DB, link); err != nil {
-		jsonError(w, "failed to create link: "+err.Error(), http.StatusInternalServerError)
+		if isConstraintError(err) {
+			jsonError(w, "slug already exists for this domain", http.StatusConflict)
+			return
+		}
+		jsonError(w, "failed to create link", http.StatusInternalServerError)
 		return
 	}
 
@@ -99,6 +121,8 @@ func (h *LinkHandler) List(w http.ResponseWriter, r *http.Request) {
 	limit, _ := strconv.Atoi(r.URL.Query().Get("limit"))
 	if limit <= 0 {
 		limit = 25
+	} else if limit > 100 {
+		limit = 100
 	}
 	offset, _ := strconv.Atoi(r.URL.Query().Get("offset"))
 	if offset < 0 {
@@ -163,18 +187,22 @@ func (h *LinkHandler) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var req createLinkRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+	var req updateLinkRequest
+	if err := decodeJSON(r, &req); err != nil {
 		jsonError(w, "invalid JSON", http.StatusBadRequest)
 		return
 	}
 
+	req.Domain = strings.ToLower(req.Domain)
 	if req.Domain != "" && !h.Cfg.IsDomainAllowed(req.Domain) {
 		jsonError(w, "domain not allowed", http.StatusBadRequest)
 		return
 	}
 
-	// Apply updates
+	// Capture old key before mutation for cache invalidation
+	oldDomain, oldSlug := existing.Domain, existing.Slug
+
+	// Apply updates — only overwrite if provided
 	if req.Slug != "" {
 		existing.Slug = req.Slug
 	}
@@ -184,15 +212,25 @@ func (h *LinkHandler) Update(w http.ResponseWriter, r *http.Request) {
 	if req.Destination != "" {
 		existing.Destination = req.Destination
 	}
-	existing.Title = req.Title
-	existing.Tags = req.Tags
-	existing.Notes = req.Notes
+	if req.Title != nil {
+		existing.Title = *req.Title
+	}
+	if req.Tags != nil {
+		existing.Tags = *req.Tags
+	}
+	if req.Notes != nil {
+		existing.Notes = *req.Notes
+	}
 
-	// Invalidate old cache entry
-	h.Cache.Invalidate(existing.Domain, existing.Slug)
+	// Invalidate old cache entry (using pre-mutation key)
+	h.Cache.Invalidate(oldDomain, oldSlug)
 
 	if err := models.UpdateLink(h.DB, existing); err != nil {
-		jsonError(w, "failed to update: "+err.Error(), http.StatusInternalServerError)
+		if isConstraintError(err) {
+			jsonError(w, "slug already exists for this domain", http.StatusConflict)
+			return
+		}
+		jsonError(w, "failed to update link", http.StatusInternalServerError)
 		return
 	}
 
@@ -223,6 +261,16 @@ func (h *LinkHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusNoContent)
+}
+
+func decodeJSON(r *http.Request, dst any) error {
+	dec := json.NewDecoder(io.LimitReader(r.Body, maxBodySize))
+	dec.DisallowUnknownFields()
+	return dec.Decode(dst)
+}
+
+func isConstraintError(err error) bool {
+	return strings.Contains(err.Error(), "UNIQUE constraint failed")
 }
 
 func jsonError(w http.ResponseWriter, msg string, code int) {
