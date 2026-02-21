@@ -440,6 +440,200 @@ select.input {
     margin-bottom: 1.5rem;
 }
 
+/* === Analytics Page === */
+.al-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 2rem;
+    margin-bottom: 2.5rem;
+}
+
+.al-header-left { flex: 1; min-width: 0; }
+
+.al-url {
+    font-size: 1.375rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    word-break: break-all;
+    line-height: 1.3;
+    color: var(--fg);
+}
+
+.al-dest {
+    display: inline-block;
+    margin-top: 0.5rem;
+    color: var(--fg-muted);
+    font-size: 0.8125rem;
+    word-break: break-all;
+    text-decoration: none;
+    transition: color 0.15s;
+}
+.al-dest:hover { color: var(--fg); text-decoration: underline; }
+
+.al-link-title {
+    margin-top: 0.375rem;
+    font-size: 0.875rem;
+    color: var(--fg-muted);
+}
+
+.al-header-right {
+    display: flex;
+    gap: 0.5rem;
+    flex-shrink: 0;
+}
+
+.al-hero {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    margin-bottom: 2rem;
+    background: linear-gradient(135deg, var(--accent) 0%, #27272a 100%);
+    border-radius: var(--radius);
+    overflow: hidden;
+}
+
+.al-hero-stat {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2.5rem 2rem;
+    position: relative;
+}
+
+.al-hero-stat + .al-hero-stat::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 20%;
+    height: 60%;
+    width: 1px;
+    background: rgba(255,255,255,0.12);
+}
+
+.al-hero-number {
+    font-size: 3rem;
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    line-height: 1;
+    color: #fff;
+}
+
+.al-hero-label {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: rgba(255,255,255,0.55);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-top: 0.625rem;
+}
+
+.al-hero-change {
+    font-size: 0.6875rem;
+    font-weight: 500;
+    margin-top: 0.375rem;
+    padding: 0.125rem 0.5rem;
+    border-radius: 9999px;
+}
+
+.al-change-up {
+    color: #4ade80;
+    background: rgba(74,222,128,0.12);
+}
+
+.al-change-down {
+    color: #fb923c;
+    background: rgba(251,146,60,0.12);
+}
+
+.al-meta {
+    display: flex;
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.al-meta-item {
+    font-size: 0.8125rem;
+    color: var(--fg-muted);
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+}
+
+.al-meta-dot {
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background: var(--ring);
+}
+
+.al-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+
+.al-breakdown {
+    padding: 0;
+    overflow: hidden;
+}
+
+.al-breakdown .card-title {
+    padding: 1rem 1.5rem 0;
+}
+
+.al-rows {
+    display: flex;
+    flex-direction: column;
+}
+
+.al-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1.5rem;
+    transition: background 0.1s;
+}
+
+.al-row:hover { background: var(--bg-muted); }
+
+.al-row + .al-row { border-top: 1px solid var(--bg-muted); }
+
+.al-row-rank {
+    width: 1.25rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--ring);
+    flex-shrink: 0;
+}
+
+.al-row-label {
+    flex: 1;
+    font-size: 0.875rem;
+    color: var(--fg);
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.al-row-count {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--fg);
+    flex-shrink: 0;
+    margin-left: 1rem;
+    background: var(--bg-muted);
+    padding: 0.125rem 0.5rem;
+    border-radius: 9999px;
+}
+
+.al-breakdown .empty-state {
+    padding: 1.5rem;
+}
+
 /* === HTMX Transitions === */
 .htmx-swapping { opacity: 0; transition: opacity 0.3s ease-out; }
 
@@ -450,5 +644,8 @@ select.input {
     .card-grid { grid-template-columns: 1fr; }
     .stat-grid { grid-template-columns: 1fr; }
     .dashboard-grid { grid-template-columns: 1fr; }
+    .al-grid { grid-template-columns: 1fr; }
+    .al-header { flex-direction: column; gap: 1rem; }
+    .al-hero-number { font-size: 2.5rem; }
     .nav-links { gap: 0.75rem; }
 }

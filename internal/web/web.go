@@ -17,6 +17,7 @@ type AdminHandler struct {
 	cfg       *config.Config
 	cache     *cache.LinkCache
 	templates *TemplateRegistry
+	appName   string
 }
 
 func NewAdminHandler(db *sql.DB, cfg *config.Config, linkCache *cache.LinkCache) (*AdminHandler, error) {
@@ -30,6 +31,7 @@ func NewAdminHandler(db *sql.DB, cfg *config.Config, linkCache *cache.LinkCache)
 		cfg:       cfg,
 		cache:     linkCache,
 		templates: tmpl,
+		appName:   cfg.AppName,
 	}, nil
 }
 
@@ -48,8 +50,7 @@ func (h *AdminHandler) RegisterRoutes(r chi.Router) {
 			r.Use(SessionMiddleware(h.cfg.Password))
 
 			r.Post("/logout", h.Logout)
-			r.Get("/", h.Dashboard)
-			r.Get("/links", h.LinkList)
+			r.Get("/", h.LinkList)
 			r.Get("/links/new", h.LinkNewPage)
 			r.Post("/links", h.LinkCreate)
 			r.Get("/links/{id}/edit", h.LinkEditPage)
@@ -61,11 +62,13 @@ func (h *AdminHandler) RegisterRoutes(r chi.Router) {
 }
 
 type PageData struct {
-	Flash *Flash
+	Flash   *Flash
+	AppName string
 }
 
 type LoginData struct {
-	Error string
+	Error   string
+	AppName string
 }
 
 func (h *AdminHandler) LoginPage(w http.ResponseWriter, r *http.Request) {
@@ -74,14 +77,14 @@ func (h *AdminHandler) LoginPage(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/admin", http.StatusFound)
 		return
 	}
-	h.templates.Render(w, "templates/login.html", LoginData{})
+	h.templates.Render(w, "templates/login.html", LoginData{AppName: h.appName})
 }
 
 func (h *AdminHandler) LoginSubmit(w http.ResponseWriter, r *http.Request) {
 	password := r.FormValue("password")
 
 	if subtle.ConstantTimeCompare([]byte(password), []byte(h.cfg.Password)) != 1 {
-		h.templates.Render(w, "templates/login.html", LoginData{Error: "Invalid password"})
+		h.templates.Render(w, "templates/login.html", LoginData{Error: "Invalid password", AppName: h.appName})
 		return
 	}
 
@@ -92,4 +95,11 @@ func (h *AdminHandler) LoginSubmit(w http.ResponseWriter, r *http.Request) {
 func (h *AdminHandler) Logout(w http.ResponseWriter, r *http.Request) {
 	destroySession(w)
 	http.Redirect(w, r, "/admin/login", http.StatusFound)
+}
+
+func (h *AdminHandler) pageData(w http.ResponseWriter, r *http.Request) PageData {
+	return PageData{
+		Flash:   getFlash(w, r),
+		AppName: h.appName,
+	}
 }

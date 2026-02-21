@@ -26,6 +26,26 @@ func ClickCountForLink(db *sql.DB, linkID int64) (int, error) {
 	return count, err
 }
 
+func ClicksTodayForLink(db *sql.DB, linkID int64) (int, error) {
+	var count int
+	err := db.QueryRow(`SELECT COUNT(*) FROM clicks WHERE link_id = ? AND date(clicked_at) = date('now')`, linkID).Scan(&count)
+	return count, err
+}
+
+// ClicksThisWeekForLink returns clicks in the last 7 days for a specific link.
+func ClicksThisWeekForLink(db *sql.DB, linkID int64) (int, error) {
+	var count int
+	err := db.QueryRow(`SELECT COUNT(*) FROM clicks WHERE link_id = ? AND clicked_at >= datetime('now', '-7 days')`, linkID).Scan(&count)
+	return count, err
+}
+
+// ClicksPrevWeekForLink returns clicks from 14 to 7 days ago for a specific link.
+func ClicksPrevWeekForLink(db *sql.DB, linkID int64) (int, error) {
+	var count int
+	err := db.QueryRow(`SELECT COUNT(*) FROM clicks WHERE link_id = ? AND clicked_at >= datetime('now', '-14 days') AND clicked_at < datetime('now', '-7 days')`, linkID).Scan(&count)
+	return count, err
+}
+
 func ClickCountsForLinks(db *sql.DB, ids []int64) (map[int64]int, error) {
 	counts := make(map[int64]int, len(ids))
 	if len(ids) == 0 {

@@ -1,72 +1,78 @@
-{{define "title"}}Analytics{{end}}
+{{define "title"}}{{.Link.ShortURL}}{{end}}
 
 {{define "content"}}
-<div class="page-header">
-    <div>
-        <h1>Analytics</h1>
-        <p class="page-subtitle mono">{{.Link.ShortURL}}</p>
-        {{if .Link.Title}}<p class="text-muted">{{.Link.Title}}</p>{{end}}
+{{if not .Link.IsActive}}
+<div class="flash flash-error">This link is inactive and returns HTTP 410 (Gone).</div>
+{{end}}
+
+<div class="al-header">
+    <div class="al-header-left">
+        <h1 class="al-url mono">{{.Link.ShortURL}}</h1>
+        <a href="{{.Link.Destination}}" target="_blank" rel="noopener" class="al-dest mono">{{truncate .Link.Destination 70}}</a>
+        {{if .Link.Title}}<p class="al-link-title">{{.Link.Title}}</p>{{end}}
     </div>
-    <div class="page-actions">
-        <a href="/admin/links/{{.Link.ID}}/edit" class="btn btn-ghost">Edit</a>
-        <a href="/admin/links" class="btn btn-ghost">Back to links</a>
+    <div class="al-header-right">
+        <a href="/admin/links/{{.Link.ID}}/edit" class="btn btn-primary">Edit</a>
+        <a href="/admin" class="btn btn-ghost">Back</a>
     </div>
 </div>
 
-<div class="stat-grid">
-    <div class="stat-card">
-        <div class="stat-label">Total clicks</div>
-        <div class="stat-value mono">{{formatNum .TotalClicks}}</div>
+<div class="al-hero">
+    <div class="al-hero-stat">
+        <span class="al-hero-number mono">{{formatNum .TotalClicks}}</span>
+        <span class="al-hero-label">Total clicks</span>
     </div>
-    <div class="stat-card">
-        <div class="stat-label">Destination</div>
-        <div class="stat-value-sm mono"><a href="{{.Link.Destination}}" target="_blank" rel="noopener">{{truncate .Link.Destination 50}}</a></div>
+    <div class="al-hero-stat">
+        <span class="al-hero-number mono">{{formatNum .ClicksToday}}</span>
+        <span class="al-hero-label">Today</span>
     </div>
-    <div class="stat-card">
-        <div class="stat-label">Created</div>
-        <div class="stat-value-sm">{{timeAgo .Link.CreatedAt}}</div>
+    <div class="al-hero-stat">
+        <span class="al-hero-number mono">{{formatNum .ClicksThisWeek}}</span>
+        <span class="al-hero-label">This week</span>
+        {{if gt .ClicksPrevWeek 0}}
+        <span class="al-hero-change {{if .WeekChangeUp}}al-change-up{{else}}al-change-down{{end}}">
+            {{if .WeekChangeUp}}+{{end}}{{.WeekChange}}% vs last week
+        </span>
+        {{end}}
     </div>
 </div>
 
-<div class="dashboard-grid">
-    <div class="card">
+<div class="al-meta">
+    <span class="al-meta-item">Created {{timeAgo .Link.CreatedAt}}</span>
+    {{if .Link.Tags}}<span class="al-meta-dot"></span><span class="al-meta-item">{{.Link.Tags}}</span>{{end}}
+</div>
+
+<div class="al-grid">
+    <div class="card al-breakdown">
         <h2 class="card-title">Top referrers</h2>
         {{if .TopReferrers}}
-        <table class="table-mini">
-            <tbody>
-                {{range .TopReferrers}}
-                <tr>
-                    <td class="mono">{{.Domain}}</td>
-                    <td class="text-right mono">{{formatNum .Count}}</td>
-                </tr>
-                {{end}}
-            </tbody>
-        </table>
+        <div class="al-rows">
+            {{range .TopReferrers}}
+            <div class="al-row">
+                <span class="al-row-label mono">{{.Domain}}</span>
+                <span class="al-row-count mono">{{formatNum .Count}}</span>
+            </div>
+            {{end}}
+        </div>
         {{else}}
         <p class="empty-state">No referrer data yet.</p>
         {{end}}
     </div>
 
-    <div class="card">
+    <div class="card al-breakdown">
         <h2 class="card-title">Top countries</h2>
         {{if .TopCountries}}
-        <table class="table-mini">
-            <tbody>
-                {{range .TopCountries}}
-                <tr>
-                    <td>{{.Country}}</td>
-                    <td class="text-right mono">{{formatNum .Count}}</td>
-                </tr>
-                {{end}}
-            </tbody>
-        </table>
+        <div class="al-rows">
+            {{range .TopCountries}}
+            <div class="al-row">
+                <span class="al-row-label">{{.Country}}</span>
+                <span class="al-row-count mono">{{formatNum .Count}}</span>
+            </div>
+            {{end}}
+        </div>
         {{else}}
         <p class="empty-state">No country data yet.</p>
         {{end}}
     </div>
 </div>
-
-{{if not .Link.IsActive}}
-<div class="flash flash-error">This link is inactive and returns HTTP 410 (Gone).</div>
-{{end}}
 {{end}}

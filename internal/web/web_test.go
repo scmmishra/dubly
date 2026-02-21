@@ -180,22 +180,28 @@ func TestProtectedRoute_RedirectsWithoutSession(t *testing.T) {
 	}
 }
 
-// === Dashboard Tests ===
 
-func TestDashboard_Renders(t *testing.T) {
-	r, _ := setupRouter(t)
+// === Combined Dashboard + Links Tests ===
+
+func TestMainPage_ShowsStatsAndLinks(t *testing.T) {
+	r, database := setupRouter(t)
 	cookie := sessionCookie(t, r)
 
+	// Create a link
+	l := &models.Link{Slug: "home", Domain: "short.io", Destination: "https://example.com", Title: "Homepage"}
+	models.CreateLink(database, l)
+
+	// Main admin page should show both stats and links
 	w := authGet(r, cookie, "/admin")
 	if w.Code != http.StatusOK {
 		t.Errorf("status = %d, want %d", w.Code, http.StatusOK)
 	}
 	body := w.Body.String()
-	if !strings.Contains(body, "Dashboard") {
-		t.Error("dashboard should contain Dashboard heading")
-	}
 	if !strings.Contains(body, "Active links") {
-		t.Error("dashboard should show Active links stat")
+		t.Error("/admin should show Active links stat")
+	}
+	if !strings.Contains(body, "short.io/home") {
+		t.Error("/admin should show links list")
 	}
 }
 
@@ -205,7 +211,7 @@ func TestLinkList_Empty(t *testing.T) {
 	r, _ := setupRouter(t)
 	cookie := sessionCookie(t, r)
 
-	w := authGet(r, cookie, "/admin/links")
+	w := authGet(r, cookie, "/admin")
 	if w.Code != http.StatusOK {
 		t.Errorf("status = %d, want %d", w.Code, http.StatusOK)
 	}
@@ -224,7 +230,7 @@ func TestLinkList_WithLinks(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	w := authGet(r, cookie, "/admin/links")
+	w := authGet(r, cookie, "/admin")
 	if w.Code != http.StatusOK {
 		t.Errorf("status = %d, want %d", w.Code, http.StatusOK)
 	}
@@ -243,7 +249,7 @@ func TestLinkList_HTMXPartial(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	req := httptest.NewRequest("GET", "/admin/links", nil)
+	req := httptest.NewRequest("GET", "/admin", nil)
 	req.AddCookie(cookie)
 	req.Header.Set("HX-Request", "true")
 	w := httptest.NewRecorder()
@@ -269,7 +275,7 @@ func TestLinkList_Search(t *testing.T) {
 	models.CreateLink(database, &models.Link{Slug: "findme", Domain: "short.io", Destination: "https://example.com"})
 	models.CreateLink(database, &models.Link{Slug: "nope", Domain: "short.io", Destination: "https://other.com"})
 
-	w := authGet(r, cookie, "/admin/links?search=findme")
+	w := authGet(r, cookie, "/admin?search=findme")
 	body := w.Body.String()
 	if !strings.Contains(body, "findme") {
 		t.Error("search should find matching links")
@@ -485,11 +491,11 @@ func TestLinkAnalytics_Renders(t *testing.T) {
 		t.Errorf("status = %d, want %d", w.Code, http.StatusOK)
 	}
 	body := w.Body.String()
-	if !strings.Contains(body, "Analytics") {
-		t.Error("analytics page should contain heading")
-	}
 	if !strings.Contains(body, "short.io/stats") {
 		t.Error("analytics page should contain short URL")
+	}
+	if !strings.Contains(body, "Total clicks") {
+		t.Error("analytics page should contain click stats")
 	}
 }
 

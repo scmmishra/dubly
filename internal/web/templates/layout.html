@@ -3,17 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{template "title" .}} — Dubly</title>
+    <title>{{template "title" .}} — {{.AppName}}</title>
     <link rel="stylesheet" href="/admin/static/css/style.css">
     <script src="/admin/static/js/htmx.min.js" defer></script>
 </head>
 <body>
     <nav class="nav">
         <div class="container nav-inner">
-            <a href="/admin" class="nav-brand">dubly</a>
+            <a href="/admin" class="nav-brand">{{.AppName}}</a>
             <div class="nav-links">
-                <a href="/admin" class="nav-link">Dashboard</a>
-                <a href="/admin/links" class="nav-link">Links</a>
                 <form method="POST" action="/admin/logout" class="nav-logout">
                     <button type="submit" class="btn btn-ghost">Log out</button>
                 </form>

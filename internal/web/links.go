@@ -15,11 +15,15 @@ const linksPerPage = 12
 
 type LinksData struct {
 	PageData
-	Links      []models.LinkWithClicks
-	Search     string
-	Page       int
-	TotalPages int
-	Total      int
+	Links         []models.LinkWithClicks
+	Search        string
+	Page          int
+	TotalPages    int
+	Total         int
+	TotalLinks    int
+	ClicksToday   int
+	ClicksAllTime int
+	TopReferrers  []models.ReferrerCount
 }
 
 type LinkFormData struct {
@@ -64,13 +68,23 @@ func (h *AdminHandler) LinkList(w http.ResponseWriter, r *http.Request) {
 		totalPages = 1
 	}
 
+	// Fetch dashboard stats
+	totalLinks, _ := models.TotalLinkCount(h.db)
+	clicksToday, _ := models.ClicksToday(h.db)
+	clicksAllTime, _ := models.ClicksAllTime(h.db)
+	topReferrers, _ := models.TopReferrersGlobal(h.db, 5)
+
 	data := LinksData{
-		PageData:   PageData{Flash: getFlash(w, r)},
-		Links:      linksWithClicks,
-		Search:     search,
-		Page:       page,
-		TotalPages: totalPages,
-		Total:      total,
+		PageData:      h.pageData(w, r),
+		Links:         linksWithClicks,
+		Search:        search,
+		Page:          page,
+		TotalPages:    totalPages,
+		Total:         total,
+		TotalLinks:    totalLinks,
+		ClicksToday:   clicksToday,
+		ClicksAllTime: clicksAllTime,
+		TopReferrers:  topReferrers,
 	}
 
 	// HTMX partial rendering
@@ -85,7 +99,7 @@ func (h *AdminHandler) LinkList(w http.ResponseWriter, r *http.Request) {
 
 func (h *AdminHandler) LinkNewPage(w http.ResponseWriter, r *http.Request) {
 	data := LinkFormData{
-		PageData: PageData{Flash: getFlash(w, r)},
+		PageData: h.pageData(w, r),
 		Domains:  h.cfg.Domains,
 		Errors:   map[string]string{},
 		Values:   map[string]string{"domain": h.cfg.Domains[0]},
@@ -119,9 +133,10 @@ func (h *AdminHandler) LinkCreate(w http.ResponseWriter, r *http.Request) {
 
 	if len(errors) > 0 {
 		data := LinkFormData{
-			Domains: h.cfg.Domains,
-			Errors:  errors,
-			Values:  values,
+			PageData: h.pageData(w, r),
+			Domains:  h.cfg.Domains,
+			Errors:   errors,
+			Values:   values,
 		}
 		h.templates.Render(w, "templates/link_new.html", data)
 		return
@@ -149,9 +164,10 @@ func (h *AdminHandler) LinkCreate(w http.ResponseWriter, r *http.Request) {
 		if slugVal == "" {
 			errors["slug"] = "Failed to generate unique slug"
 			data := LinkFormData{
-				Domains: h.cfg.Domains,
-				Errors:  errors,
-				Values:  values,
+				PageData: h.pageData(w, r),
+				Domains:  h.cfg.Domains,
+				Errors:   errors,
+				Values:   values,
 			}
 			h.templates.Render(w, "templates/link_new.html", data)
 			return
@@ -171,9 +187,10 @@ func (h *AdminHandler) LinkCreate(w http.ResponseWriter, r *http.Request) {
 		if strings.Contains(err.Error(), "UNIQUE constraint failed") {
 			errors["slug"] = "This slug already exists for this domain"
 			data := LinkFormData{
-				Domains: h.cfg.Domains,
-				Errors:  errors,
-				Values:  values,
+				PageData: h.pageData(w, r),
+				Domains:  h.cfg.Domains,
+				Errors:   errors,
+				Values:   values,
 			}
 			h.templates.Render(w, "templates/link_new.html", data)
 			return
@@ -200,7 +217,7 @@ func (h *AdminHandler) LinkEditPage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data := LinkFormData{
-		PageData: PageData{Flash: getFlash(w, r)},
+		PageData: h.pageData(w, r),
 		Link:     link,
 		Domains:  h.cfg.Domains,
 		Errors:   map[string]string{},
@@ -257,10 +274,11 @@ func (h *AdminHandler) LinkUpdate(w http.ResponseWriter, r *http.Request) {
 
 	if len(errors) > 0 {
 		data := LinkFormData{
-			Link:    existing,
-			Domains: h.cfg.Domains,
-			Errors:  errors,
-			Values:  values,
+			PageData: h.pageData(w, r),
+			Link:     existing,
+			Domains:  h.cfg.Domains,
+			Errors:   errors,
+			Values:   values,
 		}
 		h.templates.Render(w, "templates/link_edit.html", data)
 		return
@@ -282,10 +300,11 @@ func (h *AdminHandler) LinkUpdate(w http.ResponseWriter, r *http.Request) {
 		if strings.Contains(err.Error(), "UNIQUE constraint failed") {
 			errors["slug"] = "This slug already exists for this domain"
 			data := LinkFormData{
-				Link:    existing,
-				Domains: h.cfg.Domains,
-				Errors:  errors,
-				Values:  values,
+				PageData: h.pageData(w, r),
+				Link:     existing,
+				Domains:  h.cfg.Domains,
+				Errors:   errors,
+				Values:   values,
 			}
 			h.templates.Render(w, "templates/link_edit.html", data)
 			return

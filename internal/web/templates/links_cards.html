@@ -37,8 +37,8 @@
 {{if gt .TotalPages 1}}
 <div class="pagination">
     {{if gt .Page 1}}
-    <a href="/admin/links?page={{sub .Page 1}}{{if .Search}}&search={{.Search}}{{end}}"
-       hx-get="/admin/links?page={{sub .Page 1}}{{if .Search}}&search={{.Search}}{{end}}"
+    <a href="/admin?page={{sub .Page 1}}{{if .Search}}&search={{.Search}}{{end}}"
+       hx-get="/admin?page={{sub .Page 1}}{{if .Search}}&search={{.Search}}{{end}}"
        hx-target="#link-cards"
        hx-push-url="true"
        class="btn btn-ghost btn-sm">&larr; Prev</a>
@@ -47,8 +47,8 @@
     <span class="pagination-info">Page {{.Page}} of {{.TotalPages}}</span>
 
     {{if lt .Page .TotalPages}}
-    <a href="/admin/links?page={{add .Page 1}}{{if .Search}}&search={{.Search}}{{end}}"
-       hx-get="/admin/links?page={{add .Page 1}}{{if .Search}}&search={{.Search}}{{end}}"
+    <a href="/admin?page={{add .Page 1}}{{if .Search}}&search={{.Search}}{{end}}"
+       hx-get="/admin?page={{add .Page 1}}{{if .Search}}&search={{.Search}}{{end}}"
        hx-target="#link-cards"
        hx-push-url="true"
        class="btn btn-ghost btn-sm">Next &rarr;</a>

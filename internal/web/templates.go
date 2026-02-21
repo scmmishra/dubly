@@ -34,7 +34,6 @@ func NewTemplateRegistry() (*TemplateRegistry, error) {
 
 	// Page templates that use the layout
 	pages := []string{
-		"templates/dashboard.html",
 		"templates/link_new.html",
 		"templates/link_edit.html",
 		"templates/link_analytics.html",

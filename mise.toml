@@ -62,4 +62,4 @@ run = "rm -f dubly coverage.out"
 
 [tasks.serve]
 description = "Run dev server"
-run = "DUBLY_PASSWORD=test DUBLY_DOMAINS=localhost go run ./cmd/server"
+run = "DUBLY_PASSWORD=test DUBLY_DOMAINS=localhost DUBLY_DB_PATH=./dubly.db go run ./cmd/server"

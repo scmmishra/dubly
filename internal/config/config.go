@@ -17,6 +17,7 @@ type Config struct {
 	FlushInterval time.Duration
 	BufferSize    int
 	CacheSize     int
+	AppName       string
 }
 
 func Load() (*Config, error) {
@@ -46,6 +47,7 @@ func Load() (*Config, error) {
 		FlushInterval: parseDuration("DUBLY_FLUSH_INTERVAL", 30*time.Second),
 		BufferSize:    parseInt("DUBLY_BUFFER_SIZE", 50000),
 		CacheSize:     parseInt("DUBLY_CACHE_SIZE", 10000),
+		AppName:       envOrDefault("DUBLY_APP_NAME", "Dubly"),
 	}
 
 	if cfg.FlushInterval <= 0 {
