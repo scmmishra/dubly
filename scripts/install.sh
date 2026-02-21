@@ -205,10 +205,13 @@ collect_inputs() {
   echo ""
   if [ -z "$INPUT_PASSWORD" ]; then
     INPUT_PASSWORD="$(openssl rand -base64 32 | tr -d '/+=' | head -c 32)"
+    PASSWORD_AUTO=true
     echo ""
     warn "Auto-generated password: ${BOLD}$INPUT_PASSWORD${NC}"
-    warn "Save this now — it won't be shown again."
+    warn "Save this now!"
     echo ""
+  else
+    PASSWORD_AUTO=false
   fi
 
   echo ""
@@ -525,6 +528,11 @@ header "Installation Complete"
 echo -e "  ${GREEN}Dubly is now running!${NC}"
 echo ""
 echo "  Admin URL:    https://$ADMIN_DOMAIN"
+if [ "${PASSWORD_AUTO:-false}" = true ]; then
+  echo ""
+  echo -e "  ${BOLD}API password:   ${YELLOW}$INPUT_PASSWORD${NC}"
+  echo -e "  ${YELLOW}Save this — it won't be shown again.${NC}"
+fi
 echo ""
 echo -e "  ${BOLD}Useful commands:${NC}"
 echo "    systemctl status dubly       # check service status"
