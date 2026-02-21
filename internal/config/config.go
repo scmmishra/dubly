@@ -48,6 +48,16 @@ func Load() (*Config, error) {
 		CacheSize:     parseInt("DUBLY_CACHE_SIZE", 10000),
 	}
 
+	if cfg.FlushInterval <= 0 {
+		return nil, fmt.Errorf("DUBLY_FLUSH_INTERVAL must be positive")
+	}
+	if cfg.BufferSize <= 0 {
+		return nil, fmt.Errorf("DUBLY_BUFFER_SIZE must be positive")
+	}
+	if cfg.CacheSize <= 0 {
+		return nil, fmt.Errorf("DUBLY_CACHE_SIZE must be positive")
+	}
+
 	return cfg, nil
 }
 
