@@ -58,7 +58,7 @@ func (h *LinkHandler) Create(w http.ResponseWriter, r *http.Request) {
 
 	// Generate slug if not provided, with collision retry
 	if req.Slug == "" {
-		for i := 0; i < 10; i++ {
+		for range 10 {
 			candidate := slug.Generate()
 			exists, err := models.SlugExists(h.DB, candidate, req.Domain)
 			if err != nil {
