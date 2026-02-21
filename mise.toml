@@ -1,0 +1,61 @@
+[tools]
+go = "1.24"
+
+[tasks.build]
+description = "Build the server binary"
+run = "go build -o dubly ./cmd/server"
+sources = ["**/*.go", "go.mod", "go.sum"]
+outputs = ["dubly"]
+
+[tasks.run]
+description = "Run the server"
+depends = ["build"]
+run = "./dubly"
+
+[tasks.dev]
+description = "Run the server with go run (no binary)"
+run = "go run ./cmd/server"
+
+[tasks.test]
+description = "Run all tests"
+run = "go test ./internal/... -count=1"
+
+[tasks."test:verbose"]
+description = "Run all tests with verbose output"
+run = "go test ./internal/... -v -count=1"
+
+[tasks."test:cover"]
+description = "Run tests with coverage report"
+run = [
+  "go test ./internal/... -coverprofile=coverage.out -count=1",
+  "go tool cover -func=coverage.out",
+]
+
+[tasks."test:cover:html"]
+description = "Open coverage report in browser"
+depends = ["test:cover"]
+run = "go tool cover -html=coverage.out"
+
+[tasks.fmt]
+description = "Format all Go files"
+run = "gofmt -w ."
+
+[tasks."fmt:check"]
+description = "Check formatting without writing"
+run = "test -z \"$(gofmt -l .)\""
+
+[tasks.vet]
+description = "Run go vet"
+run = "go vet ./..."
+
+[tasks.lint]
+description = "Run all linters (fmt check + vet)"
+depends = ["fmt:check", "vet"]
+
+[tasks.check]
+description = "Run lint and tests"
+depends = ["lint", "test"]
+
+[tasks.clean]
+description = "Remove build artifacts"
+run = "rm -f dubly coverage.out"
