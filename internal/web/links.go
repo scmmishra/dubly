@@ -200,7 +200,7 @@ func (h *AdminHandler) LinkCreate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	setFlash(w, "success", "Link created: "+link.ShortURL)
-	http.Redirect(w, r, "/admin/links", http.StatusFound)
+	http.Redirect(w, r, "/admin", http.StatusFound)
 }
 
 func (h *AdminHandler) LinkEditPage(w http.ResponseWriter, r *http.Request) {
