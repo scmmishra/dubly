@@ -63,3 +63,15 @@ run = "rm -f dubly coverage.out"
 [tasks.serve]
 description = "Run dev server"
 run = "DUBLY_PASSWORD=test DUBLY_DOMAINS=localhost DUBLY_DB_PATH=./dubly.db go run ./cmd/server"
+
+[tasks.bench]
+description = "Run redirect throughput benchmark (50 workers, 10s)"
+run = "go run ./cmd/bench -c 50 -d 10s"
+
+[tasks."bench:quick"]
+description = "Quick benchmark sanity check (10 workers, 3s)"
+run = "go run ./cmd/bench -c 10 -d 3s"
+
+[tasks."bench:heavy"]
+description = "Heavy load benchmark (100 workers, 30s)"
+run = "go run ./cmd/bench -c 100 -d 30s"
