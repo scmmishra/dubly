@@ -7,12 +7,17 @@ import (
 
 const charset = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
 
+var maxIdx = big.NewInt(int64(len(charset)))
+
 // Generate returns a random 6-character Base62 string.
-func Generate() string {
+func Generate() (string, error) {
 	b := make([]byte, 6)
 	for i := range b {
-		n, _ := rand.Int(rand.Reader, big.NewInt(int64(len(charset))))
+		n, err := rand.Int(rand.Reader, maxIdx)
+		if err != nil {
+			return "", err
+		}
 		b[i] = charset[n.Int64()]
 	}
-	return string(b)
+	return string(b), nil
 }
