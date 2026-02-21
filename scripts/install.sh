@@ -123,11 +123,11 @@ prompt() {
   local value
 
   if [ -n "$default" ]; then
-    read -rp "  $prompt_text [$default]: " value
+    read -rp "  $prompt_text [$default]: " value </dev/tty
     value="${value:-$default}"
   else
     while true; do
-      read -rp "  $prompt_text: " value
+      read -rp "  $prompt_text: " value </dev/tty
       [ -n "$value" ] && break
       warn "This field is required."
     done
@@ -141,7 +141,7 @@ prompt_secret() {
   local value
 
   while true; do
-    read -rsp "  $prompt_text: " value
+    read -rsp "  $prompt_text: " value </dev/tty
     echo ""
     [ -n "$value" ] && break
     warn "This field is required."
@@ -154,7 +154,7 @@ prompt_yn() {
   local prompt_text="$1" default="${2:-n}"
   local value
 
-  read -rp "  $prompt_text " value
+  read -rp "  $prompt_text " value </dev/tty
   value="${value:-$default}"
   [[ "$value" =~ ^[Yy] ]]
 }
@@ -201,7 +201,7 @@ collect_inputs() {
 
   echo ""
   echo -e "  ${BOLD}Authentication${NC}"
-  read -rsp "  API password (blank = auto-generate): " INPUT_PASSWORD
+  read -rsp "  API password (blank = auto-generate): " INPUT_PASSWORD </dev/tty
   echo ""
   if [ -z "$INPUT_PASSWORD" ]; then
     INPUT_PASSWORD="$(openssl rand -base64 32 | tr -d '/+=' | head -c 32)"
@@ -228,7 +228,7 @@ collect_inputs() {
   echo ""
   echo -e "  ${BOLD}GeoIP (optional)${NC}"
   info "Free MaxMind license: https://www.maxmind.com/en/geolite2/signup"
-  read -rp "  MaxMind license key (blank to skip): " INPUT_GEOIP_KEY
+  read -rp "  MaxMind license key (blank to skip): " INPUT_GEOIP_KEY </dev/tty
   INPUT_GEOIP_KEY="${INPUT_GEOIP_KEY:-}"
 }
 
@@ -369,8 +369,11 @@ if [ "${SKIP_PROMPTS:-false}" = false ] && [ -n "${INPUT_GEOIP_KEY:-}" ]; then
     ok "GeoIP database already exists, skipping"
   else
     info "Downloading MaxMind GeoLite2-City..."
-    GEOIP_URL="https://download.maxmind.com/app/geoip_download?edition_id=GeoLite2-City&license_key=${INPUT_GEOIP_KEY}&suffix=tar.gz"
-    curl -fsSL "$GEOIP_URL" -o /tmp/geoip.tar.gz
+    curl -fsSL -o /tmp/geoip.tar.gz -G \
+      --data-urlencode "edition_id=GeoLite2-City" \
+      --data-urlencode "license_key=${INPUT_GEOIP_KEY}" \
+      --data-urlencode "suffix=tar.gz" \
+      "https://download.maxmind.com/app/geoip_download"
     tar -xzf /tmp/geoip.tar.gz -C /tmp --wildcards '*.mmdb'
     mv /tmp/GeoLite2-City_*/GeoLite2-City.mmdb "$GEOIP_PATH"
     rm -rf /tmp/GeoLite2-City_* /tmp/geoip.tar.gz
