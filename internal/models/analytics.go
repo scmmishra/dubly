@@ -15,6 +15,16 @@ type CountryCount struct {
 	Count   int
 }
 
+type BrowserCount struct {
+	Browser string
+	Count   int
+}
+
+type DeviceCount struct {
+	DeviceType string
+	Count      int
+}
+
 type LinkWithClicks struct {
 	Link       Link
 	ClickCount int
@@ -121,6 +131,48 @@ func TopCountriesForLink(db *sql.DB, linkID int64, limit int) ([]CountryCount, e
 	return results, rows.Err()
 }
 
+func TopBrowsersForLink(db *sql.DB, linkID int64, limit int) ([]BrowserCount, error) {
+	rows, err := db.Query(
+		`SELECT browser, COUNT(*) as cnt FROM clicks WHERE link_id = ? AND browser != '' GROUP BY browser ORDER BY cnt DESC LIMIT ?`,
+		linkID, limit,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("top browsers: %w", err)
+	}
+	defer rows.Close()
+
+	var results []BrowserCount
+	for rows.Next() {
+		var b BrowserCount
+		if err := rows.Scan(&b.Browser, &b.Count); err != nil {
+			return nil, fmt.Errorf("scan browser: %w", err)
+		}
+		results = append(results, b)
+	}
+	return results, rows.Err()
+}
+
+func TopDevicesForLink(db *sql.DB, linkID int64, limit int) ([]DeviceCount, error) {
+	rows, err := db.Query(
+		`SELECT device_type, COUNT(*) as cnt FROM clicks WHERE link_id = ? AND device_type != '' GROUP BY device_type ORDER BY cnt DESC LIMIT ?`,
+		linkID, limit,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("top devices: %w", err)
+	}
+	defer rows.Close()
+
+	var results []DeviceCount
+	for rows.Next() {
+		var d DeviceCount
+		if err := rows.Scan(&d.DeviceType, &d.Count); err != nil {
+			return nil, fmt.Errorf("scan device: %w", err)
+		}
+		results = append(results, d)
+	}
+	return results, rows.Err()
+}
+
 func TotalLinkCount(db *sql.DB) (int, error) {
 	var count int
 	err := db.QueryRow(`SELECT COUNT(*) FROM links WHERE is_active = 1`).Scan(&count)
@@ -168,6 +220,69 @@ func TopLinksByClicks(db *sql.DB, limit int) ([]LinkWithClicks, error) {
 		lc.Link.IsActive = active == 1
 		lc.Link.FillShortURL()
 		results = append(results, lc)
+	}
+	return results, rows.Err()
+}
+
+func TopBrowsersGlobal(db *sql.DB, limit int) ([]BrowserCount, error) {
+	rows, err := db.Query(
+		`SELECT browser, COUNT(*) as cnt FROM clicks WHERE browser != '' GROUP BY browser ORDER BY cnt DESC LIMIT ?`,
+		limit,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("global browsers: %w", err)
+	}
+	defer rows.Close()
+
+	var results []BrowserCount
+	for rows.Next() {
+		var b BrowserCount
+		if err := rows.Scan(&b.Browser, &b.Count); err != nil {
+			return nil, fmt.Errorf("scan browser: %w", err)
+		}
+		results = append(results, b)
+	}
+	return results, rows.Err()
+}
+
+func TopDevicesGlobal(db *sql.DB, limit int) ([]DeviceCount, error) {
+	rows, err := db.Query(
+		`SELECT device_type, COUNT(*) as cnt FROM clicks WHERE device_type != '' GROUP BY device_type ORDER BY cnt DESC LIMIT ?`,
+		limit,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("global devices: %w", err)
+	}
+	defer rows.Close()
+
+	var results []DeviceCount
+	for rows.Next() {
+		var d DeviceCount
+		if err := rows.Scan(&d.DeviceType, &d.Count); err != nil {
+			return nil, fmt.Errorf("scan device: %w", err)
+		}
+		results = append(results, d)
+	}
+	return results, rows.Err()
+}
+
+func TopCountriesGlobal(db *sql.DB, limit int) ([]CountryCount, error) {
+	rows, err := db.Query(
+		`SELECT country, COUNT(*) as cnt FROM clicks WHERE country != '' GROUP BY country ORDER BY cnt DESC LIMIT ?`,
+		limit,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("global countries: %w", err)
+	}
+	defer rows.Close()
+
+	var results []CountryCount
+	for rows.Next() {
+		var c CountryCount
+		if err := rows.Scan(&c.Country, &c.Count); err != nil {
+			return nil, fmt.Errorf("scan country: %w", err)
+		}
+		results = append(results, c)
 	}
 	return results, rows.Err()
 }

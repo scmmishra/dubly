@@ -20,6 +20,8 @@ type AnalyticsData struct {
 	WeekChangeUp   bool // true if this week >= prev week
 	TopReferrers   []models.ReferrerCount
 	TopCountries   []models.CountryCount
+	TopBrowsers    []models.BrowserCount
+	TopDevices     []models.DeviceCount
 }
 
 func (h *AdminHandler) LinkAnalytics(w http.ResponseWriter, r *http.Request) {
@@ -42,6 +44,8 @@ func (h *AdminHandler) LinkAnalytics(w http.ResponseWriter, r *http.Request) {
 	clicksPrevWeek, _ := models.ClicksPrevWeekForLink(h.db, id)
 	topReferrers, _ := models.TopReferrersForLink(h.db, id, 5)
 	topCountries, _ := models.TopCountriesForLink(h.db, id, 5)
+	topBrowsers, _ := models.TopBrowsersForLink(h.db, id, 5)
+	topDevices, _ := models.TopDevicesForLink(h.db, id, 5)
 
 	weekChange := 0
 	weekChangeUp := true
@@ -63,6 +67,8 @@ func (h *AdminHandler) LinkAnalytics(w http.ResponseWriter, r *http.Request) {
 		WeekChangeUp:   weekChangeUp,
 		TopReferrers:   topReferrers,
 		TopCountries:   topCountries,
+		TopBrowsers:    topBrowsers,
+		TopDevices:     topDevices,
 	}
 
 	h.templates.Render(w, "templates/link_analytics.html", data)

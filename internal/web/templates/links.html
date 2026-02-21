@@ -22,19 +22,68 @@
         </div>
     </div>
     <div class="dash-referrers">
-        <h2 class="card-title">Top referrers</h2>
-        {{if .TopReferrers}}
-        <div class="al-rows">
-            {{range .TopReferrers}}
-            <div class="al-row">
-                <span class="al-row-label mono">{{.Domain}}</span>
-                <span class="al-row-count mono">{{formatNum .Count}}</span>
+        <div class="dash-tabs">
+            <button class="dash-tab active" data-tab="referrers">Referrers</button>
+            <button class="dash-tab" data-tab="countries">Countries</button>
+            <button class="dash-tab" data-tab="browsers">Browsers</button>
+            <button class="dash-tab" data-tab="devices">Devices</button>
+        </div>
+        <div class="dash-tab-panel active" data-panel="referrers">
+            {{if .TopReferrers}}
+            <div class="al-rows">
+                {{range .TopReferrers}}
+                <div class="al-row">
+                    <span class="al-row-label mono">{{.Domain}}</span>
+                    <span class="al-row-count mono">{{formatNum .Count}}</span>
+                </div>
+                {{end}}
             </div>
+            {{else}}
+            <p class="empty-state">No referrer data yet.</p>
             {{end}}
         </div>
-        {{else}}
-        <p class="empty-state">No referrer data yet.</p>
-        {{end}}
+        <div class="dash-tab-panel" data-panel="countries">
+            {{if .TopCountries}}
+            <div class="al-rows">
+                {{range .TopCountries}}
+                <div class="al-row">
+                    <span class="al-row-label">{{countryFlag .Country}} {{.Country}}</span>
+                    <span class="al-row-count mono">{{formatNum .Count}}</span>
+                </div>
+                {{end}}
+            </div>
+            {{else}}
+            <p class="empty-state">No country data yet.</p>
+            {{end}}
+        </div>
+        <div class="dash-tab-panel" data-panel="browsers">
+            {{if .TopBrowsers}}
+            <div class="al-rows">
+                {{range .TopBrowsers}}
+                <div class="al-row">
+                    <span class="al-row-label">{{.Browser}}</span>
+                    <span class="al-row-count mono">{{formatNum .Count}}</span>
+                </div>
+                {{end}}
+            </div>
+            {{else}}
+            <p class="empty-state">No browser data yet.</p>
+            {{end}}
+        </div>
+        <div class="dash-tab-panel" data-panel="devices">
+            {{if .TopDevices}}
+            <div class="al-rows">
+                {{range .TopDevices}}
+                <div class="al-row">
+                    <span class="al-row-label">{{title .DeviceType}}</span>
+                    <span class="al-row-count mono">{{formatNum .Count}}</span>
+                </div>
+                {{end}}
+            </div>
+            {{else}}
+            <p class="empty-state">No device data yet.</p>
+            {{end}}
+        </div>
     </div>
 </div>
 
@@ -93,6 +142,20 @@
 
     // Re-apply after HTMX settles new content
     document.addEventListener('htmx:afterSettle', function() { apply(localStorage.getItem(key) || 'grid'); });
+})();
+
+// Dashboard tabs
+(function() {
+    document.querySelectorAll('.dash-tab').forEach(function(tab) {
+        tab.addEventListener('click', function() {
+            var target = tab.getAttribute('data-tab');
+            var container = tab.closest('.dash-referrers');
+            container.querySelectorAll('.dash-tab').forEach(function(t) { t.classList.remove('active'); });
+            container.querySelectorAll('.dash-tab-panel').forEach(function(p) { p.classList.remove('active'); });
+            tab.classList.add('active');
+            container.querySelector('[data-panel="' + target + '"]').classList.add('active');
+        });
+    });
 })();
 </script>
 {{end}}

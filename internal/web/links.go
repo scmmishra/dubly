@@ -24,6 +24,9 @@ type LinksData struct {
 	ClicksToday   int
 	ClicksAllTime int
 	TopReferrers  []models.ReferrerCount
+	TopCountries  []models.CountryCount
+	TopBrowsers   []models.BrowserCount
+	TopDevices    []models.DeviceCount
 }
 
 type LinkFormData struct {
@@ -73,6 +76,9 @@ func (h *AdminHandler) LinkList(w http.ResponseWriter, r *http.Request) {
 	clicksToday, _ := models.ClicksToday(h.db)
 	clicksAllTime, _ := models.ClicksAllTime(h.db)
 	topReferrers, _ := models.TopReferrersGlobal(h.db, 5)
+	topCountries, _ := models.TopCountriesGlobal(h.db, 5)
+	topBrowsers, _ := models.TopBrowsersGlobal(h.db, 5)
+	topDevices, _ := models.TopDevicesGlobal(h.db, 5)
 
 	data := LinksData{
 		PageData:      h.pageData(w, r),
@@ -85,6 +91,9 @@ func (h *AdminHandler) LinkList(w http.ResponseWriter, r *http.Request) {
 		ClicksToday:   clicksToday,
 		ClicksAllTime: clicksAllTime,
 		TopReferrers:  topReferrers,
+		TopCountries:  topCountries,
+		TopBrowsers:   topBrowsers,
+		TopDevices:    topDevices,
 	}
 
 	// HTMX partial rendering

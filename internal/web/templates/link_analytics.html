@@ -71,5 +71,37 @@
         <p class="empty-state">No country data yet.</p>
         {{end}}
     </div>
+
+    <div class="card al-breakdown">
+        <h2 class="card-title">Top browsers</h2>
+        {{if .TopBrowsers}}
+        <div class="al-rows">
+            {{range .TopBrowsers}}
+            <div class="al-row">
+                <span class="al-row-label">{{.Browser}}</span>
+                <span class="al-row-count mono">{{formatNum .Count}}</span>
+            </div>
+            {{end}}
+        </div>
+        {{else}}
+        <p class="empty-state">No browser data yet.</p>
+        {{end}}
+    </div>
+
+    <div class="card al-breakdown">
+        <h2 class="card-title">Devices</h2>
+        {{if .TopDevices}}
+        <div class="al-rows">
+            {{range .TopDevices}}
+            <div class="al-row">
+                <span class="al-row-label">{{title .DeviceType}}</span>
+                <span class="al-row-count mono">{{formatNum .Count}}</span>
+            </div>
+            {{end}}
+        </div>
+        {{else}}
+        <p class="empty-state">No device data yet.</p>
+        {{end}}
+    </div>
 </div>
 {{end}}
