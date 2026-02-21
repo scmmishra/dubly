@@ -8,7 +8,7 @@ set -euo pipefail
 # ─────────────────────────────────────────────────────────────────────
 
 INSTALL_DIR="/opt/dubly"
-REPO_URL="https://github.com/chatwoot/dubly.git"
+REPO_URL="https://github.com/scmmishra/dubly.git"
 GO_VERSION="1.24.0"
 LITESTREAM_VERSION="0.3.13"
 
