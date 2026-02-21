@@ -5,6 +5,8 @@
 <div class="flash flash-error">This link is inactive and returns HTTP 410 (Gone).</div>
 {{end}}
 
+<a href="/admin" class="al-back">&larr; Back</a>
+
 <div class="al-header">
     <div class="al-header-left">
         <h1 class="al-url mono">{{.Link.ShortURL}}</h1>
@@ -12,8 +14,8 @@
         {{if .Link.Title}}<p class="al-link-title">{{.Link.Title}}</p>{{end}}
     </div>
     <div class="al-header-right">
+        <a href="{{.Link.ShortURL}}" target="_blank" rel="noopener" class="btn btn-ghost">Visit</a>
         <a href="/admin/links/{{.Link.ID}}/edit" class="btn btn-primary">Edit</a>
-        <a href="/admin" class="btn btn-ghost">Back</a>
     </div>
 </div>
 
@@ -28,18 +30,13 @@
     </div>
     <div class="al-hero-stat">
         <span class="al-hero-number mono">{{formatNum .ClicksThisWeek}}</span>
-        <span class="al-hero-label">This week</span>
-        {{if gt .ClicksPrevWeek 0}}
-        <span class="al-hero-change {{if .WeekChangeUp}}al-change-up{{else}}al-change-down{{end}}">
-            {{if .WeekChangeUp}}+{{end}}{{.WeekChange}}% vs last week
-        </span>
-        {{end}}
+        <span class="al-hero-label">This week{{if gt .ClicksPrevWeek 0}} <span class="al-hero-change {{if .WeekChangeUp}}al-change-up{{else}}al-change-down{{end}}">{{if .WeekChangeUp}}+{{end}}{{.WeekChange}}%</span>{{end}}</span>
     </div>
 </div>
 
 <div class="al-meta">
     <span class="al-meta-item">Created {{timeAgo .Link.CreatedAt}}</span>
-    {{if .Link.Tags}}<span class="al-meta-dot"></span><span class="al-meta-item">{{.Link.Tags}}</span>{{end}}
+    {{if .Link.Tags}}<span class="al-meta-item al-meta-has-dot">{{spaceTags .Link.Tags}}</span>{{end}}
 </div>
 
 <div class="al-grid">
@@ -65,7 +62,7 @@
         <div class="al-rows">
             {{range .TopCountries}}
             <div class="al-row">
-                <span class="al-row-label">{{.Country}}</span>
+                <span class="al-row-label">{{countryFlag .Country}} {{.Country}}</span>
                 <span class="al-row-count mono">{{formatNum .Count}}</span>
             </div>
             {{end}}

@@ -1,6 +1,6 @@
 {{define "cards"}}
 {{if .Links}}
-<div class="card-grid">
+<div class="card-grid" id="link-grid">
     {{range .Links}}
     <div class="card link-card{{if not .Link.IsActive}} link-inactive{{end}}" id="link-{{.Link.ID}}">
         <div class="link-card-header">

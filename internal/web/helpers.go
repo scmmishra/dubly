@@ -15,7 +15,9 @@ func templateFuncMap() template.FuncMap {
 		"add":       func(a, b int) int { return a + b },
 		"sub":       func(a, b int) int { return a - b },
 		"seq":       seq,
-		"lower":     strings.ToLower,
+		"lower":       strings.ToLower,
+		"countryFlag": countryFlag,
+		"spaceTags":   func(s string) string { return strings.ReplaceAll(s, ",", ", ") },
 	}
 }
 
@@ -66,6 +68,14 @@ func truncate(s string, maxLen int) string {
 		return s
 	}
 	return s[:maxLen-1] + "\u2026"
+}
+
+func countryFlag(code string) string {
+	if len(code) != 2 {
+		return code
+	}
+	code = strings.ToUpper(code)
+	return string(rune(code[0])-'A'+0x1F1E6) + string(rune(code[1])-'A'+0x1F1E6)
 }
 
 func seq(start, end int) []int {

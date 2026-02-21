@@ -51,9 +51,48 @@
         hx-push-url="true"
         hx-include="this"
     >
+    <div class="view-toggle">
+        <button type="button" class="view-toggle-btn active" data-view="grid" title="Grid view">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><rect x="1" y="1" width="6" height="6" rx="1.5"/><rect x="9" y="1" width="6" height="6" rx="1.5"/><rect x="1" y="9" width="6" height="6" rx="1.5"/><rect x="9" y="9" width="6" height="6" rx="1.5"/></svg>
+        </button>
+        <button type="button" class="view-toggle-btn" data-view="list" title="List view">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><rect x="1" y="1.5" width="14" height="3" rx="1.5"/><rect x="1" y="6.5" width="14" height="3" rx="1.5"/><rect x="1" y="11.5" width="14" height="3" rx="1.5"/></svg>
+        </button>
+    </div>
 </div>
 
 <div id="link-cards">
     {{template "cards" .}}
 </div>
+
+<script>
+(function() {
+    var key = 'dubly_view';
+    var saved = localStorage.getItem(key) || 'grid';
+    var btns = document.querySelectorAll('.view-toggle-btn');
+
+    function apply(view) {
+        var grid = document.getElementById('link-grid');
+        if (!grid) return;
+        if (view === 'list') {
+            grid.classList.add('view-list');
+        } else {
+            grid.classList.remove('view-list');
+        }
+        btns.forEach(function(b) {
+            b.classList.toggle('active', b.getAttribute('data-view') === view);
+        });
+        localStorage.setItem(key, view);
+    }
+
+    apply(saved);
+
+    btns.forEach(function(b) {
+        b.addEventListener('click', function() { apply(b.getAttribute('data-view')); });
+    });
+
+    // Re-apply after HTMX settles new content
+    document.addEventListener('htmx:afterSettle', function() { apply(localStorage.getItem(key) || 'grid'); });
+})();
+</script>
 {{end}}
