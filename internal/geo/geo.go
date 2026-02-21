@@ -48,7 +48,8 @@ func (r *Reader) Lookup(ipStr string) Result {
 
 	var record struct {
 		Country struct {
-			Names map[string]string `maxminddb:"names"`
+			ISOCode string            `maxminddb:"iso_code"`
+			Names   map[string]string `maxminddb:"names"`
 		} `maxminddb:"country"`
 		City struct {
 			Names map[string]string `maxminddb:"names"`
@@ -67,7 +68,7 @@ func (r *Reader) Lookup(ipStr string) Result {
 	}
 
 	res := Result{
-		Country:   record.Country.Names["en"],
+		Country:   record.Country.ISOCode,
 		City:      record.City.Names["en"],
 		Latitude:  record.Location.Latitude,
 		Longitude: record.Location.Longitude,
