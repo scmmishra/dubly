@@ -64,6 +64,14 @@ run = "rm -f dubly coverage.out"
 description = "Run dev server"
 run = "DUBLY_PASSWORD=test DUBLY_DOMAINS=localhost DUBLY_DB_PATH=./dubly.db go run ./cmd/server"
 
+[tasks.start]
+description = "Build, restore (if needed), and run under Litestream"
+run = "./scripts/start.sh"
+
+[tasks.restore]
+description = "Restore SQLite database from S3 replica"
+run = "litestream restore -config litestream.yml -if-replica-exists ${DUBLY_DB_PATH:-./dubly.db}"
+
 [tasks.bench]
 description = "Run redirect throughput benchmark (50 workers, 10s)"
 run = "go run ./cmd/bench -c 50 -d 10s"

@@ -1,0 +1,11 @@
+dbs:
+  - path: ${DUBLY_DB_PATH:-./dubly.db}
+    replicas:
+      - type: s3
+        bucket: ${LITESTREAM_S3_BUCKET}
+        path: dubly
+        endpoint: ${LITESTREAM_S3_ENDPOINT}
+        region: ${LITESTREAM_S3_REGION}
+        access-key-id: ${LITESTREAM_ACCESS_KEY_ID}
+        secret-access-key: ${LITESTREAM_SECRET_ACCESS_KEY}
+        force-path-style: true
