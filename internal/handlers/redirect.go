@@ -9,6 +9,7 @@ import (
 
 	"github.com/scmmishra/dubly/internal/analytics"
 	"github.com/scmmishra/dubly/internal/cache"
+	"github.com/scmmishra/dubly/internal/datacenter"
 	"github.com/scmmishra/dubly/internal/models"
 )
 
@@ -16,6 +17,7 @@ type RedirectHandler struct {
 	DB        *sql.DB
 	Cache     *cache.LinkCache
 	Collector *analytics.Collector
+	DC        *datacenter.Checker
 }
 
 func (h *RedirectHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -60,7 +62,7 @@ func (h *RedirectHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		ip = r.RemoteAddr
 	}
 
-	if !analytics.IsBot(r.UserAgent()) {
+	if !analytics.IsBot(r.UserAgent()) && (h.DC == nil || !h.DC.IsBlocked(ip)) {
 		h.Collector.Push(analytics.RawClick{
 			LinkID:    link.ID,
 			ClickedAt: time.Now().UTC(),

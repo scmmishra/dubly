@@ -15,6 +15,7 @@ import (
 	"github.com/scmmishra/dubly/internal/analytics"
 	"github.com/scmmishra/dubly/internal/cache"
 	"github.com/scmmishra/dubly/internal/config"
+	"github.com/scmmishra/dubly/internal/datacenter"
 	"github.com/scmmishra/dubly/internal/db"
 	"github.com/scmmishra/dubly/internal/geo"
 	"github.com/scmmishra/dubly/internal/handlers"
@@ -46,6 +47,7 @@ func main() {
 	}
 
 	collector := analytics.NewCollector(database, geoReader, cfg.BufferSize, cfg.FlushInterval)
+	dcChecker := datacenter.NewChecker()
 
 	linkHandler := &handlers.LinkHandler{
 		DB:    database,
@@ -57,6 +59,7 @@ func main() {
 		DB:        database,
 		Cache:     linkCache,
 		Collector: collector,
+		DC:        dcChecker,
 	}
 
 	r := chi.NewRouter()
@@ -111,5 +114,6 @@ func main() {
 	}
 
 	collector.Shutdown()
+	dcChecker.Shutdown()
 	log.Println("goodbye")
 }
