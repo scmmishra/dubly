@@ -38,9 +38,7 @@
     <h2>Adding a new domain</h2>
     <ol>
         <li>Point an A record for your domain to your server IP</li>
-        <li>Add the domain to <code>DUBLY_DOMAINS</code> in <code>/opt/dubly/.env</code></li>
-        <li>Add the domain to <code>/etc/caddy/Caddyfile</code></li>
-        <li>Run <code>sudo systemctl restart dubly caddy</code></li>
+        <li>Run <code>sudo bash /opt/dubly/scripts/add-domain.sh example.com</code></li>
     </ol>
 </div>
 {{end}}
