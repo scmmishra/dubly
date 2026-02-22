@@ -26,6 +26,14 @@ To update later:
 sudo /opt/dubly/scripts/install.sh --update
 ```
 
+To add a new domain to an existing installation:
+
+```bash
+sudo bash /opt/dubly/scripts/add-domain.sh newdomain.com
+```
+
+This updates the `.env` and Caddyfile, then restarts both services. You still need to point a DNS A record to your server.
+
 ## Local Development
 
 ```bash
@@ -120,3 +128,11 @@ Clicks are buffered in memory and saved to SQLite in batches. Each click records
 - Timestamp, IP, referer
 - Browser, OS, device type
 - Country, city, region, coordinates (requires [GeoLite2](https://www.maxmind.com/en/geolite2/signup))
+
+### Bot & Non-Human Traffic Filtering
+
+Dubly automatically filters out non-human traffic so analytics only count real clicks. Bots still get redirected — they just aren't recorded.
+
+**User-Agent detection** — Requests are checked against known bot signatures: link-preview fetchers (iMessage, Discord, Slack, WhatsApp, Facebook, Twitter, LinkedIn, Telegram), search engine crawlers, HTTP client libraries (curl, wget, python-requests, etc.), headless browsers, and security scanners.
+
+**IP-based filtering** — On startup, Dubly fetches known datacenter and threat IP ranges and refreshes them every 24 hours. Clicks from these IPs are dropped.
