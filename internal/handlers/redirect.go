@@ -60,13 +60,15 @@ func (h *RedirectHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		ip = r.RemoteAddr
 	}
 
-	h.Collector.Push(analytics.RawClick{
-		LinkID:    link.ID,
-		ClickedAt: time.Now().UTC(),
-		IP:        ip,
-		UserAgent: r.UserAgent(),
-		Referer:   r.Referer(),
-	})
+	if !analytics.IsBot(r.UserAgent()) {
+		h.Collector.Push(analytics.RawClick{
+			LinkID:    link.ID,
+			ClickedAt: time.Now().UTC(),
+			IP:        ip,
+			UserAgent: r.UserAgent(),
+			Referer:   r.Referer(),
+		})
+	}
 
 	http.Redirect(w, r, link.Destination, http.StatusFound)
 }
