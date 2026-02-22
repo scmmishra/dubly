@@ -1,0 +1,46 @@
+{{define "title"}}Domains{{end}}
+
+{{define "content"}}
+<div class="page-header">
+    <div>
+        <h1>Domains</h1>
+        {{if not .CheckedAt.IsZero}}
+        <p class="page-subtitle">Last checked {{timeAgo .CheckedAt}}</p>
+        {{end}}
+    </div>
+    <div class="page-actions">
+        <form method="POST" action="/admin/domains/refresh">
+            <button type="submit" class="btn">Refresh DNS</button>
+        </form>
+    </div>
+</div>
+
+<div class="card al-breakdown">
+    {{if .Domains}}
+    <div class="al-rows">
+        {{range .Domains}}
+        <div class="al-row">
+            <span class="al-row-label mono">{{.Name}}</span>
+            {{if .IPs}}
+            <span class="al-row-count mono text-muted">{{.IPs}}</span>
+            {{else}}
+            <span class="text-muted" style="font-size:0.8125rem">No A record</span>
+            {{end}}
+        </div>
+        {{end}}
+    </div>
+    {{else}}
+    <p class="empty-state" style="padding:1.5rem">No domains configured.</p>
+    {{end}}
+</div>
+
+<div class="domains-help">
+    <h2>Adding a new domain</h2>
+    <ol>
+        <li>Point an A record for your domain to your server IP</li>
+        <li>Add the domain to <code>DUBLY_DOMAINS</code> in <code>/opt/dubly/.env</code></li>
+        <li>Add the domain to <code>/etc/caddy/Caddyfile</code></li>
+        <li>Run <code>sudo systemctl restart dubly caddy</code></li>
+    </ol>
+</div>
+{{end}}

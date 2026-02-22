@@ -940,6 +940,37 @@ select.input {
   padding: 1.5rem;
 }
 
+/* === Domains Help === */
+.domains-help {
+  margin-top: 2rem;
+  font-size: 0.875rem;
+  color: var(--fg-muted);
+}
+
+.domains-help h2 {
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--fg-muted);
+  margin-bottom: 0.75rem;
+}
+
+.domains-help ol {
+  padding-left: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.domains-help code {
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  background: var(--bg-muted);
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
+}
+
 /* === HTMX Transitions === */
 .htmx-swapping {
   opacity: 0;

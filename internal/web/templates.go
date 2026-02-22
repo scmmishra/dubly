@@ -37,6 +37,7 @@ func NewTemplateRegistry() (*TemplateRegistry, error) {
 		"templates/link_new.html",
 		"templates/link_edit.html",
 		"templates/link_analytics.html",
+		"templates/domains.html",
 	}
 
 	for _, page := range pages {

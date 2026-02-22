@@ -18,6 +18,7 @@ type AdminHandler struct {
 	cache     *cache.LinkCache
 	templates *TemplateRegistry
 	appName   string
+	dns       *dnsCache
 }
 
 func NewAdminHandler(db *sql.DB, cfg *config.Config, linkCache *cache.LinkCache) (*AdminHandler, error) {
@@ -32,6 +33,7 @@ func NewAdminHandler(db *sql.DB, cfg *config.Config, linkCache *cache.LinkCache)
 		cache:     linkCache,
 		templates: tmpl,
 		appName:   cfg.AppName,
+		dns:       newDNSCache(),
 	}, nil
 }
 
@@ -57,6 +59,8 @@ func (h *AdminHandler) RegisterRoutes(r chi.Router) {
 			r.Post("/links/{id}", h.LinkUpdate)
 			r.Delete("/links/{id}", h.LinkDelete)
 			r.Get("/links/{id}/analytics", h.LinkAnalytics)
+			r.Get("/domains", h.DomainsPage)
+			r.Post("/domains/refresh", h.DomainsRefresh)
 		})
 	})
 }
