@@ -180,14 +180,23 @@ func TestParseIPRanges_SkipsInvalidLines(t *testing.T) {
 	}
 }
 
-// ── fetchIPList (Tor / Greensnow format) ────────────────────────────
+// ── Fetcher: plain CIDR text ────────────────────────────────────────
 
-func TestFetchIPList_ParsesPlainIPs(t *testing.T) {
+func TestFetchCIDRsFrom_ParsesPlainCIDRs(t *testing.T) {
+	srv := serveText(t, "45.32.0.0/15\n64.156.0.0/18\n# comment line\n")
+	nets, err := fetchCIDRsFrom(srv.URL)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(nets) != 2 {
+		t.Fatalf("got %d ranges, want 2", len(nets))
+	}
+}
+
+// ── Fetcher: plain IP text (Tor / Greensnow) ────────────────────────
+
+func TestFetchIPListFrom_ParsesPlainIPs(t *testing.T) {
 	srv := serveText(t, "1.2.3.4\n5.6.7.8\n# comment\n\n9.10.11.12\n")
-	origURL := torExitNodeURL
-	defer func() {}()
-
-	// Test the underlying parsing through a real HTTP server
 	ips, err := fetchIPListFrom(srv.URL)
 	if err != nil {
 		t.Fatal(err)
@@ -195,7 +204,6 @@ func TestFetchIPList_ParsesPlainIPs(t *testing.T) {
 	if len(ips) != 3 {
 		t.Fatalf("got %d IPs, want 3", len(ips))
 	}
-	_ = origURL
 
 	want := map[string]bool{"1.2.3.4": true, "5.6.7.8": true, "9.10.11.12": true}
 	for _, ip := range ips {
@@ -205,7 +213,7 @@ func TestFetchIPList_ParsesPlainIPs(t *testing.T) {
 	}
 }
 
-func TestFetchIPList_SkipsInvalidLines(t *testing.T) {
+func TestFetchIPListFrom_SkipsInvalidLines(t *testing.T) {
 	srv := serveText(t, "1.2.3.4\nnot-an-ip\n5.6.7.8\n")
 	ips, err := fetchIPListFrom(srv.URL)
 	if err != nil {
@@ -216,9 +224,9 @@ func TestFetchIPList_SkipsInvalidLines(t *testing.T) {
 	}
 }
 
-// ── fetchIpsumIPs format ────────────────────────────────────────────
+// ── Fetcher: IPsum tab-separated format ─────────────────────────────
 
-func TestFetchIpsumIPs_ParsesTabSeparatedFormat(t *testing.T) {
+func TestFetchIpsumIPsFrom_ParsesTabSeparatedFormat(t *testing.T) {
 	body := `# IPsum threat intelligence
 # Generated on ...
 1.2.3.4	3
@@ -237,9 +245,9 @@ func TestFetchIpsumIPs_ParsesTabSeparatedFormat(t *testing.T) {
 	}
 }
 
-// ── OCI JSON format ─────────────────────────────────────────────────
+// ── Fetcher: OCI JSON format ────────────────────────────────────────
 
-func TestFetchOCIRanges_ParsesJSON(t *testing.T) {
+func TestFetchOCIRangesFrom_ParsesJSON(t *testing.T) {
 	body := `{
 		"regions": [
 			{
@@ -267,28 +275,14 @@ func TestFetchOCIRanges_ParsesJSON(t *testing.T) {
 	}
 }
 
-// ── DigitalOcean CSV format ─────────────────────────────────────────
+// ── Fetcher: DigitalOcean CSV format ────────────────────────────────
 
-func TestFetchDORanges_ParsesCSV(t *testing.T) {
+func TestFetchDORangesFrom_ParsesCSV(t *testing.T) {
 	body := `192.241.128.0/17,US,US-NY,New York
 104.131.0.0/18,US,US-NJ,Clifton
 `
 	srv := serveText(t, body)
 	nets, err := fetchDORangesFrom(srv.URL)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if len(nets) != 2 {
-		t.Fatalf("got %d ranges, want 2", len(nets))
-	}
-}
-
-// ── Vultr text format ───────────────────────────────────────────────
-
-func TestFetchVultrRanges_ParsesPlainCIDRs(t *testing.T) {
-	body := "45.32.0.0/15\n64.156.0.0/18\n# comment line\n"
-	srv := serveText(t, body)
-	nets, err := fetchVultrRangesFrom(srv.URL)
 	if err != nil {
 		t.Fatal(err)
 	}

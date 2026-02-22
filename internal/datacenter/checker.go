@@ -15,22 +15,18 @@ import (
 )
 
 const (
-	// Datacenter CIDR sources
 	datacenterIPRangesURL = "https://raw.githubusercontent.com/jhassine/server-ip-addresses/master/data/datacenters.txt"
 	ociCIDRURL            = "https://docs.cloud.oracle.com/en-us/iaas/tools/public_ip_ranges.json"
 	doCIDRURL             = "https://www.digitalocean.com/geo/google.csv"
 	vultrCIDRURL          = "https://geofeed.constant.com/?text"
-
-	// Threat / anonymizer IP sources
-	torExitNodeURL = "https://check.torproject.org/torbulkexitlist"
-	ipsumURL       = "https://raw.githubusercontent.com/stamparm/ipsum/master/ipsum.txt"
-	greensnowURL   = "https://blocklist.greensnow.co/greensnow.txt"
+	torExitNodeURL        = "https://check.torproject.org/torbulkexitlist"
+	ipsumURL              = "https://raw.githubusercontent.com/stamparm/ipsum/master/ipsum.txt"
+	greensnowURL          = "https://blocklist.greensnow.co/greensnow.txt"
 
 	refreshInterval = 24 * time.Hour
 	fetchTimeout    = 30 * time.Second
 )
 
-// Hardcoded CIDR ranges for providers without downloadable feeds.
 var (
 	akamaiCIDR = []string{
 		"23.32.0.0/11", "23.192.0.0/11", "2.16.0.0/13", "104.64.0.0/10",
@@ -78,12 +74,9 @@ func (c *Checker) IsBlocked(ip string) bool {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 
-	// O(1) check against individual blocked IPs
 	if c.blockedIPs[ip] {
 		return true
 	}
-
-	// Linear scan of CIDR ranges
 	for _, n := range c.ranges {
 		if n.Contains(parsed) {
 			return true
@@ -100,7 +93,6 @@ func (c *Checker) Shutdown() {
 
 func (c *Checker) run() {
 	defer close(c.done)
-
 	c.refresh()
 
 	ticker := time.NewTicker(refreshInterval)
@@ -120,32 +112,44 @@ func (c *Checker) refresh() {
 	var wg sync.WaitGroup
 	var mu sync.Mutex
 	var errs []string
-
-	// Fetch CIDR ranges
 	var newRanges []*net.IPNet
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		ranges, err := fetchAllRanges()
-		if err != nil {
-			mu.Lock()
-			errs = append(errs, err.Error())
-			mu.Unlock()
-		}
-		mu.Lock()
-		newRanges = ranges
-		mu.Unlock()
-	}()
-
-	// Fetch individual IP blocklists
 	newBlocked := make(map[string]bool)
+
+	// CIDR range sources — all fetched concurrently
+	cidrSources := []struct {
+		name string
+		fn   func() ([]*net.IPNet, error)
+	}{
+		{"main", func() ([]*net.IPNet, error) { return fetchCIDRsFrom(datacenterIPRangesURL) }},
+		{"oci", func() ([]*net.IPNet, error) { return fetchOCIRangesFrom(ociCIDRURL) }},
+		{"digitalocean", func() ([]*net.IPNet, error) { return fetchDORangesFrom(doCIDRURL) }},
+		{"vultr", func() ([]*net.IPNet, error) { return fetchCIDRsFrom(vultrCIDRURL) }},
+		{"akamai", func() ([]*net.IPNet, error) { return parseCIDRList(akamaiCIDR) }},
+		{"scaleway", func() ([]*net.IPNet, error) { return parseCIDRList(scalewayCIDR) }},
+	}
+
+	for _, src := range cidrSources {
+		wg.Add(1)
+		go func(name string, fn func() ([]*net.IPNet, error)) {
+			defer wg.Done()
+			ranges, err := fn()
+			mu.Lock()
+			if err != nil {
+				errs = append(errs, fmt.Sprintf("%s: %v", name, err))
+			}
+			newRanges = append(newRanges, ranges...)
+			mu.Unlock()
+		}(src.name, src.fn)
+	}
+
+	// Individual IP blocklists — all fetched concurrently
 	ipSources := []struct {
 		name string
 		fn   func() ([]string, error)
 	}{
-		{"tor", fetchTorExitNodes},
-		{"ipsum", fetchIpsumIPs},
-		{"greensnow", fetchGreensnowIPs},
+		{"tor", func() ([]string, error) { return fetchIPListFrom(torExitNodeURL) }},
+		{"ipsum", func() ([]string, error) { return fetchIpsumIPsFrom(ipsumURL) }},
+		{"greensnow", func() ([]string, error) { return fetchIPListFrom(greensnowURL) }},
 	}
 
 	for _, src := range ipSources {
@@ -153,13 +157,10 @@ func (c *Checker) refresh() {
 		go func(name string, fn func() ([]string, error)) {
 			defer wg.Done()
 			ips, err := fn()
-			if err != nil {
-				mu.Lock()
-				errs = append(errs, fmt.Sprintf("%s: %v", name, err))
-				mu.Unlock()
-				return
-			}
 			mu.Lock()
+			if err != nil {
+				errs = append(errs, fmt.Sprintf("%s: %v", name, err))
+			}
 			for _, ip := range ips {
 				newBlocked[ip] = true
 			}
@@ -185,71 +186,17 @@ func (c *Checker) refresh() {
 	log.Printf("ipcheck: loaded %d CIDR ranges, %d blocked IPs", len(newRanges), len(newBlocked))
 }
 
-// ── CIDR range fetchers ─────────────────────────────────────────────
+// ── Fetchers ────────────────────────────────────────────────────────
 
-func fetchAllRanges() ([]*net.IPNet, error) {
-	type result struct {
-		ranges []*net.IPNet
-		err    error
-	}
-
-	sources := []struct {
-		name string
-		fn   func() ([]*net.IPNet, error)
-	}{
-		{"main", fetchMainRanges},
-		{"oci", fetchOCIRanges},
-		{"digitalocean", fetchDORanges},
-		{"vultr", fetchVultrRanges},
-		{"akamai", func() ([]*net.IPNet, error) { return parseCIDRList(akamaiCIDR) }},
-		{"scaleway", func() ([]*net.IPNet, error) { return parseCIDRList(scalewayCIDR) }},
-	}
-
-	results := make([]result, len(sources))
-	var wg sync.WaitGroup
-
-	for i, src := range sources {
-		wg.Add(1)
-		go func(idx int, name string, fn func() ([]*net.IPNet, error)) {
-			defer wg.Done()
-			r, err := fn()
-			if err != nil {
-				results[idx] = result{err: fmt.Errorf("%s: %w", name, err)}
-				return
-			}
-			results[idx] = result{ranges: r}
-		}(i, src.name, src.fn)
-	}
-
-	wg.Wait()
-
-	var all []*net.IPNet
-	var errs []string
-	for _, r := range results {
-		if r.err != nil {
-			errs = append(errs, r.err.Error())
-		}
-		all = append(all, r.ranges...)
-	}
-
-	if len(errs) > 0 {
-		return all, fmt.Errorf("%s", strings.Join(errs, "; "))
-	}
-	return all, nil
-}
-
-func fetchMainRanges() ([]*net.IPNet, error) {
-	resp, err := httpGet(datacenterIPRangesURL)
+// fetchCIDRsFrom downloads a plain text file of one CIDR per line.
+func fetchCIDRsFrom(url string) ([]*net.IPNet, error) {
+	resp, err := httpGet(url)
 	if err != nil {
 		return nil, err
 	}
 	defer resp.Body.Close()
 	return parseIPRanges(resp.Body)
 }
-
-func fetchOCIRanges() ([]*net.IPNet, error)   { return fetchOCIRangesFrom(ociCIDRURL) }
-func fetchDORanges() ([]*net.IPNet, error)    { return fetchDORangesFrom(doCIDRURL) }
-func fetchVultrRanges() ([]*net.IPNet, error) { return fetchVultrRangesFrom(vultrCIDRURL) }
 
 func fetchOCIRangesFrom(url string) ([]*net.IPNet, error) {
 	resp, err := httpGet(url)
@@ -302,45 +249,7 @@ func fetchDORangesFrom(url string) ([]*net.IPNet, error) {
 	return parseCIDRList(cidrs)
 }
 
-func fetchVultrRangesFrom(url string) ([]*net.IPNet, error) {
-	resp, err := httpGet(url)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-	return parseIPRanges(resp.Body)
-}
-
-// ── Individual IP fetchers ──────────────────────────────────────────
-
-func fetchTorExitNodes() ([]string, error) { return fetchIPListFrom(torExitNodeURL) }
-func fetchGreensnowIPs() ([]string, error) { return fetchIPListFrom(greensnowURL) }
-func fetchIpsumIPs() ([]string, error)     { return fetchIpsumIPsFrom(ipsumURL) }
-
-func fetchIpsumIPsFrom(url string) ([]string, error) {
-	resp, err := httpGet(url)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	var ips []string
-	scanner := bufio.NewScanner(resp.Body)
-	for scanner.Scan() {
-		line := strings.TrimSpace(scanner.Text())
-		if line == "" || strings.HasPrefix(line, "#") {
-			continue
-		}
-		// IPsum format: "ip<tab>score"
-		fields := strings.Fields(line)
-		if len(fields) > 0 && net.ParseIP(fields[0]) != nil {
-			ips = append(ips, fields[0])
-		}
-	}
-	return ips, scanner.Err()
-}
-
-// fetchIPListFrom downloads a plain text list of one IP per line.
+// fetchIPListFrom downloads a plain text file of one IP per line.
 func fetchIPListFrom(url string) ([]string, error) {
 	resp, err := httpGet(url)
 	if err != nil {
@@ -357,6 +266,29 @@ func fetchIPListFrom(url string) ([]string, error) {
 		}
 		if net.ParseIP(line) != nil {
 			ips = append(ips, line)
+		}
+	}
+	return ips, scanner.Err()
+}
+
+// fetchIpsumIPsFrom parses the IPsum "ip<tab>score" format.
+func fetchIpsumIPsFrom(url string) ([]string, error) {
+	resp, err := httpGet(url)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	var ips []string
+	scanner := bufio.NewScanner(resp.Body)
+	for scanner.Scan() {
+		line := strings.TrimSpace(scanner.Text())
+		if line == "" || strings.HasPrefix(line, "#") {
+			continue
+		}
+		fields := strings.Fields(line)
+		if len(fields) > 0 && net.ParseIP(fields[0]) != nil {
+			ips = append(ips, fields[0])
 		}
 	}
 	return ips, scanner.Err()
