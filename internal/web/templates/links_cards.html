@@ -4,11 +4,14 @@
     {{range .Links}}
     <div class="card link-card{{if not .Link.IsActive}} link-inactive{{end}}" id="link-{{.Link.ID}}">
         <div class="link-card-header">
-            <a href="/admin/links/{{.Link.ID}}/analytics" class="mono link-url">{{.Link.ShortURL}}</a>
-            {{if not .Link.IsActive}}<span class="badge badge-inactive">inactive</span>{{end}}
-        </div>
-        <div class="link-card-dest">
-            <span class="text-muted" title="{{.Link.Destination}}">{{truncate .Link.Destination 60}}</span>
+            <span class="favicon-circle"><img class="favicon" src="https://favicon.im/{{hostname .Link.Destination}}?larger=true" onerror="this.src='https://www.google.com/s2/favicons?domain={{hostname .Link.Destination}}&sz=128'" alt="" width="16" height="16"></span>
+            <div class="link-card-meta">
+                <a href="/admin/links/{{.Link.ID}}/analytics" class="mono link-url">{{.Link.ShortURL}}</a>
+                {{if not .Link.IsActive}}<span class="badge badge-inactive">inactive</span>{{end}}
+                <div class="link-card-dest">
+                    <span class="text-muted" title="{{.Link.Destination}}">{{truncate .Link.Destination 60}}</span>
+                </div>
+            </div>
         </div>
         {{if .Link.Title}}
         <div class="link-card-title">{{.Link.Title}}</div>

@@ -3,22 +3,24 @@ package web
 import (
 	"fmt"
 	"html/template"
+	"net/url"
 	"strings"
 	"time"
 )
 
 func templateFuncMap() template.FuncMap {
 	return template.FuncMap{
-		"timeAgo":   timeAgo,
-		"formatNum": formatNum,
-		"truncate":  truncate,
-		"add":       func(a, b int) int { return a + b },
-		"sub":       func(a, b int) int { return a - b },
-		"seq":       seq,
+		"timeAgo":     timeAgo,
+		"formatNum":   formatNum,
+		"truncate":    truncate,
+		"add":         func(a, b int) int { return a + b },
+		"sub":         func(a, b int) int { return a - b },
+		"seq":         seq,
 		"lower":       strings.ToLower,
 		"title":       titleCase,
 		"countryFlag": countryFlag,
 		"spaceTags":   func(s string) string { return strings.ReplaceAll(s, ",", ", ") },
+		"hostname":    hostname,
 	}
 }
 
@@ -95,4 +97,12 @@ func seq(start, end int) []int {
 		result = append(result, i)
 	}
 	return result
+}
+
+func hostname(rawURL string) string {
+	u, err := url.Parse(rawURL)
+	if err != nil {
+		return ""
+	}
+	return u.Hostname()
 }
