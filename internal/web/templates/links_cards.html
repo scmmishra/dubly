@@ -24,17 +24,7 @@
             <span class="text-muted">{{timeAgo .Link.CreatedAt}}</span>
         </div>
         <div class="link-card-actions">
-            <a href="/admin/links/{{.Link.ID}}/edit" class="btn btn-ghost btn-sm">Edit</a>
-            <a href="/admin/links/{{.Link.ID}}/analytics" class="btn btn-ghost btn-sm">Analytics</a>
-            {{if .Link.IsActive}}
-            <button
-                class="btn btn-destructive btn-sm"
-                hx-delete="/admin/links/{{.Link.ID}}"
-                hx-confirm="Delete this link?"
-                hx-target="#link-{{.Link.ID}}"
-                hx-swap="outerHTML swap:0.3s"
-            >Delete</button>
-            {{end}}
+            <a href="/admin/links/{{.Link.ID}}/analytics" class="btn-arrow" title="Open dashboard">&rarr;</a>
         </div>
     </div>
     {{end}}

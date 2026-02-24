@@ -186,12 +186,12 @@ a:hover {
 }
 
 .btn-destructive {
-  color: var(--destructive);
+  color: #fff;
   border-color: transparent;
-  background: transparent;
+  background: var(--destructive);
 }
 .btn-destructive:hover {
-  background: #fef2f2;
+  background: #b91c1c;
 }
 
 .btn-sm {
@@ -359,7 +359,25 @@ select.input {
 
 .link-card-actions {
   display: flex;
-  gap: 0.25rem;
+  align-items: center;
+}
+
+.btn-arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: var(--radius-sm);
+  color: var(--fg-muted);
+  text-decoration: none;
+  font-size: 1.125rem;
+  transition: color 0.15s, background 0.15s;
+}
+.btn-arrow:hover {
+  color: var(--fg);
+  background: var(--bg-muted);
+  text-decoration: none;
 }
 
 /* === Copy Button === */

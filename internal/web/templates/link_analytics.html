@@ -16,6 +16,16 @@
     <div class="al-header-right">
         <a href="{{.Link.ShortURL}}" target="_blank" rel="noopener" class="btn btn-ghost">Visit</a>
         <a href="/admin/links/{{.Link.ID}}/edit" class="btn btn-primary">Edit</a>
+        {{if .Link.IsActive}}
+        <button
+            class="btn btn-destructive"
+            hx-delete="/admin/links/{{.Link.ID}}"
+            hx-confirm="Delete this link?"
+            hx-target="body"
+            hx-swap="none"
+            hx-on::after-request="if(event.detail.successful) window.location='/admin'"
+        >Delete</button>
+        {{end}}
     </div>
 </div>
 
