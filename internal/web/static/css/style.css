@@ -269,17 +269,34 @@ select.input {
   margin-bottom: 1rem;
 }
 
-.card-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr));
-  gap: 1rem;
+.link-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.link-list .card {
+  border-radius: 0;
+  border-bottom: none;
+}
+.link-list .card:first-child {
+  border-radius: var(--radius) var(--radius) 0 0;
+}
+.link-list .card:last-child {
+  border-radius: 0 0 var(--radius) var(--radius);
+  border-bottom: 1px solid var(--border);
+}
+.link-list .card:only-child {
+  border-radius: var(--radius);
+  border-bottom: 1px solid var(--border);
 }
 
 /* === Link Cards === */
 .link-card {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 0 1.5rem;
+  padding: 1rem 1.5rem;
 }
 .link-card.link-inactive {
   opacity: 0.6;
@@ -323,24 +340,58 @@ select.input {
   white-space: nowrap;
 }
 
+.link-card-url-row {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
 .link-card-title {
-  font-size: 0.875rem;
-  font-weight: 500;
+  display: none;
 }
 
 .link-card-footer {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   font-size: 0.8125rem;
-  margin-top: auto;
-  padding-top: 0.5rem;
+  gap: 1rem;
 }
 
 .link-card-actions {
   display: flex;
   gap: 0.25rem;
-  padding-top: 0.5rem;
-  border-top: 1px solid var(--border);
+}
+
+/* === Copy Button === */
+.btn-copy {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--fg-muted);
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: color 0.15s, background 0.15s;
+}
+.btn-copy:hover {
+  color: var(--fg);
+  background: var(--bg-muted);
+}
+.btn-copy .icon-check {
+  display: none;
+}
+.btn-copy.copied .icon-copy {
+  display: none;
+}
+.btn-copy.copied {
+  color: var(--fg);
+}
+.btn-copy.copied .icon-check {
+  display: block;
 }
 
 .link-card-actions .btn-ghost {
@@ -515,90 +566,6 @@ select.input {
   max-width: 24rem;
 }
 
-/* === View Toggle === */
-.view-toggle {
-  display: flex;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  overflow: hidden;
-}
-
-.view-toggle-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 2.25rem;
-  height: 2.25rem;
-  background: var(--bg-card);
-  border: none;
-  color: var(--fg-muted);
-  cursor: pointer;
-  transition:
-    background 0.15s,
-    color 0.15s;
-}
-
-.view-toggle-btn:hover {
-  color: var(--fg);
-  background: var(--bg-muted);
-}
-.view-toggle-btn.active {
-  color: var(--fg);
-  background: var(--bg-muted);
-}
-.view-toggle-btn + .view-toggle-btn {
-  border-left: 1px solid var(--border);
-}
-
-/* === List View === */
-.card-grid.view-list {
-  grid-template-columns: 1fr;
-  gap: 0;
-}
-
-.card-grid.view-list .link-card {
-  border-radius: 0;
-  border-bottom: none;
-  display: grid;
-  grid-template-columns: 1fr 1fr auto;
-  grid-template-rows: auto;
-  align-items: center;
-  gap: 0 1.5rem;
-  padding: 1rem 1.5rem;
-}
-
-.card-grid.view-list .link-card:first-child {
-  border-radius: var(--radius) var(--radius) 0 0;
-}
-.card-grid.view-list .link-card:last-child {
-  border-radius: 0 0 var(--radius) var(--radius);
-  border-bottom: 1px solid var(--border);
-}
-.card-grid.view-list .link-card:only-child {
-  border-radius: var(--radius);
-  border-bottom: 1px solid var(--border);
-}
-
-.card-grid.view-list .link-card-header {
-  grid-column: 1;
-  grid-row: 1;
-}
-.card-grid.view-list .link-card-title {
-  display: none;
-}
-.card-grid.view-list .link-card-footer {
-  grid-column: 2;
-  grid-row: 1;
-  justify-content: flex-end;
-  gap: 1rem;
-}
-.card-grid.view-list .link-card-actions {
-  grid-column: 3;
-  grid-row: 1;
-  border-top: none;
-  padding-top: 0;
-  align-self: start;
-}
 
 /* === Pagination === */
 .pagination {

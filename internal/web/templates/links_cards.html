@@ -1,21 +1,24 @@
 {{define "cards"}}
 {{if .Links}}
-<div class="card-grid" id="link-grid">
+<div class="link-list" id="link-grid">
     {{range .Links}}
     <div class="card link-card{{if not .Link.IsActive}} link-inactive{{end}}" id="link-{{.Link.ID}}">
         <div class="link-card-header">
             <span class="favicon-circle"><img class="favicon" src="https://favicon.im/{{hostname .Link.Destination}}?larger=true" onerror="this.src='https://www.google.com/s2/favicons?domain={{hostname .Link.Destination}}&sz=128'" alt="" width="16" height="16"></span>
             <div class="link-card-meta">
-                <a href="/admin/links/{{.Link.ID}}/analytics" class="mono link-url">{{.Link.ShortURL}}</a>
-                {{if not .Link.IsActive}}<span class="badge badge-inactive">inactive</span>{{end}}
+                <div class="link-card-url-row">
+                    <a href="/admin/links/{{.Link.ID}}/analytics" class="mono link-url">{{.Link.ShortURL}}</a>
+                    <button class="btn-copy" data-url="https://{{.Link.ShortURL}}" title="Copy short URL">
+                        <svg class="icon-copy" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="5.5" y="5.5" width="8" height="8" rx="1.5"/><path d="M5 10.5H3.5a1.5 1.5 0 01-1.5-1.5v-6A1.5 1.5 0 013.5 1.5h6A1.5 1.5 0 0111 3v1.5"/></svg>
+                        <svg class="icon-check" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 8.5l3.5 3.5 6.5-7"/></svg>
+                    </button>
+                    {{if not .Link.IsActive}}<span class="badge badge-inactive">inactive</span>{{end}}
+                </div>
                 <div class="link-card-dest">
                     <span class="text-muted" title="{{.Link.Destination}}">{{truncate .Link.Destination 60}}</span>
                 </div>
             </div>
         </div>
-        {{if .Link.Title}}
-        <div class="link-card-title">{{.Link.Title}}</div>
-        {{end}}
         <div class="link-card-footer">
             <span class="mono text-muted">{{formatNum .ClickCount}} clicks</span>
             <span class="text-muted">{{timeAgo .Link.CreatedAt}}</span>
