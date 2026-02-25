@@ -4,3 +4,4 @@
 *.mmdb
 /cmd/server/server
 /dubly
+server

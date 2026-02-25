@@ -59,6 +59,7 @@ func (h *AdminHandler) RegisterRoutes(r chi.Router) {
 			r.Post("/links/{id}", h.LinkUpdate)
 			r.Delete("/links/{id}", h.LinkDelete)
 			r.Get("/links/{id}/analytics", h.LinkAnalytics)
+			r.Get("/links/{id}/qr", h.LinkQRCode)
 			r.Get("/domains", h.DomainsPage)
 			r.Post("/domains/refresh", h.DomainsRefresh)
 		})
