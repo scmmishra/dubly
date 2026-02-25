@@ -3,10 +3,8 @@
 A simple, single-user URL shortener. Built with Go and SQLite. Comes with an admin UI, click analytics, and support for multiple custom domains.
 
 <p>
-  <img src=".github/screenshot-main-dashboard.png" alt="Dashboard" width="100%">
-</p>
-<p>
-  <img src=".github/screenshot-analytics.png" alt="Link Analytics" width="100%">
+  <img src=".github/screenshot-main-dashboard.png" alt="Dashboard" width="49%">
+  <img src=".github/screenshot-analytics.png" alt="Link Analytics" width="49%">
 </p>
 
 ## Install
