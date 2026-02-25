@@ -644,6 +644,51 @@ select.input {
   padding-top: 0.5rem;
 }
 
+/* === UTM Builder === */
+.utm-builder {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  margin-bottom: 1.25rem;
+}
+
+.utm-builder-toggle {
+  padding: 0.625rem 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  user-select: none;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.utm-builder-toggle::-webkit-details-marker {
+  display: none;
+}
+
+.utm-builder-toggle::before {
+  content: "›";
+  display: inline-block;
+  transition: transform 0.15s ease;
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.utm-builder[open] > .utm-builder-toggle::before {
+  transform: rotate(90deg);
+}
+
+.utm-fields {
+  padding: 0.75rem;
+  border-top: 1px solid var(--border);
+}
+
+.utm-fields .field:last-child,
+.utm-fields .field-row:last-child {
+  margin-bottom: 0;
+}
+
 /* === Flash Messages === */
 .flash {
   padding: 0.75rem 1rem;

@@ -61,6 +61,41 @@
                       placeholder="Internal notes...">{{index .Values "notes"}}</textarea>
         </div>
 
+        <details class="utm-builder" {{if hasUTM .Values}}open{{end}}>
+            <summary class="utm-builder-toggle">UTM Parameters <span class="text-muted">(optional)</span></summary>
+            <div class="utm-fields">
+                <div class="field-row">
+                    <div class="field field-grow">
+                        <label for="utm_source" class="label">Source</label>
+                        <input type="text" id="utm_source" name="utm_source" class="input"
+                               placeholder="google" value="{{index .Values "utm_source"}}">
+                    </div>
+                    <div class="field field-grow">
+                        <label for="utm_medium" class="label">Medium</label>
+                        <input type="text" id="utm_medium" name="utm_medium" class="input"
+                               placeholder="cpc" value="{{index .Values "utm_medium"}}">
+                    </div>
+                </div>
+                <div class="field">
+                    <label for="utm_campaign" class="label">Campaign</label>
+                    <input type="text" id="utm_campaign" name="utm_campaign" class="input"
+                           placeholder="spring_sale" value="{{index .Values "utm_campaign"}}">
+                </div>
+                <div class="field-row">
+                    <div class="field field-grow">
+                        <label for="utm_content" class="label">Content</label>
+                        <input type="text" id="utm_content" name="utm_content" class="input"
+                               placeholder="banner_ad" value="{{index .Values "utm_content"}}">
+                    </div>
+                    <div class="field field-grow">
+                        <label for="utm_term" class="label">Term</label>
+                        <input type="text" id="utm_term" name="utm_term" class="input"
+                               placeholder="running+shoes" value="{{index .Values "utm_term"}}">
+                    </div>
+                </div>
+            </div>
+        </details>
+
         <div class="form-actions">
             <a href="/admin" class="btn btn-ghost">Cancel</a>
             <button type="submit" class="btn btn-primary">Create link</button>

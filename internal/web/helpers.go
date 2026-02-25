@@ -21,6 +21,14 @@ func templateFuncMap() template.FuncMap {
 		"countryFlag": countryFlag,
 		"spaceTags":   func(s string) string { return strings.ReplaceAll(s, ",", ", ") },
 		"hostname":    hostname,
+		"hasUTM": func(values map[string]string) bool {
+			for _, k := range []string{"utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content"} {
+				if values[k] != "" {
+					return true
+				}
+			}
+			return false
+		},
 	}
 }
 

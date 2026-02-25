@@ -2,6 +2,7 @@ package web
 
 import (
 	"net/http"
+	"net/url"
 	"strconv"
 	"strings"
 
@@ -10,6 +11,60 @@ import (
 	"github.com/scmmishra/dubly/internal/models"
 	"github.com/scmmishra/dubly/internal/slug"
 )
+
+var utmKeys = []string{"utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content"}
+
+// buildDestinationWithUTM strips existing UTM params from rawURL then appends
+// any non-empty values from utmValues. Returns rawURL unchanged on parse error.
+func buildDestinationWithUTM(rawURL string, utmValues map[string]string) string {
+	u, err := url.Parse(rawURL)
+	if err != nil {
+		return rawURL
+	}
+	q := u.Query()
+	for _, k := range utmKeys {
+		q.Del(k)
+	}
+	for _, k := range utmKeys {
+		if v := utmValues[k]; v != "" {
+			q.Set(k, v)
+		}
+	}
+	u.RawQuery = q.Encode()
+	return u.String()
+}
+
+// extractUTMValues returns a map of utm_* key → value parsed from rawURL.
+// Missing params are empty strings.
+func extractUTMValues(rawURL string) map[string]string {
+	result := make(map[string]string, len(utmKeys))
+	u, err := url.Parse(rawURL)
+	if err != nil {
+		for _, k := range utmKeys {
+			result[k] = ""
+		}
+		return result
+	}
+	q := u.Query()
+	for _, k := range utmKeys {
+		result[k] = q.Get(k)
+	}
+	return result
+}
+
+// stripUTMParams returns rawURL with all utm_* query params removed.
+func stripUTMParams(rawURL string) string {
+	u, err := url.Parse(rawURL)
+	if err != nil {
+		return rawURL
+	}
+	q := u.Query()
+	for _, k := range utmKeys {
+		q.Del(k)
+	}
+	u.RawQuery = q.Encode()
+	return u.String()
+}
 
 const linksPerPage = 12
 
@@ -120,12 +175,17 @@ func (h *AdminHandler) LinkCreate(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 
 	values := map[string]string{
-		"destination": r.FormValue("destination"),
-		"domain":      r.FormValue("domain"),
-		"slug":        r.FormValue("slug"),
-		"title":       r.FormValue("title"),
-		"tags":        r.FormValue("tags"),
-		"notes":       r.FormValue("notes"),
+		"destination":  r.FormValue("destination"),
+		"domain":       r.FormValue("domain"),
+		"slug":         r.FormValue("slug"),
+		"title":        r.FormValue("title"),
+		"tags":         r.FormValue("tags"),
+		"notes":        r.FormValue("notes"),
+		"utm_source":   r.FormValue("utm_source"),
+		"utm_medium":   r.FormValue("utm_medium"),
+		"utm_campaign": r.FormValue("utm_campaign"),
+		"utm_term":     r.FormValue("utm_term"),
+		"utm_content":  r.FormValue("utm_content"),
 	}
 
 	errors := map[string]string{}
@@ -183,10 +243,18 @@ func (h *AdminHandler) LinkCreate(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	utmValues := map[string]string{
+		"utm_source":   values["utm_source"],
+		"utm_medium":   values["utm_medium"],
+		"utm_campaign": values["utm_campaign"],
+		"utm_term":     values["utm_term"],
+		"utm_content":  values["utm_content"],
+	}
+
 	link := &models.Link{
 		Slug:        slugVal,
 		Domain:      domain,
-		Destination: values["destination"],
+		Destination: buildDestinationWithUTM(values["destination"], utmValues),
 		Title:       values["title"],
 		Tags:        values["tags"],
 		Notes:       values["notes"],
@@ -225,19 +293,27 @@ func (h *AdminHandler) LinkEditPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	utmVals := extractUTMValues(link.Destination)
+	values := map[string]string{
+		"destination":  stripUTMParams(link.Destination),
+		"domain":       link.Domain,
+		"slug":         link.Slug,
+		"title":        link.Title,
+		"tags":         link.Tags,
+		"notes":        link.Notes,
+		"utm_source":   utmVals["utm_source"],
+		"utm_medium":   utmVals["utm_medium"],
+		"utm_campaign": utmVals["utm_campaign"],
+		"utm_term":     utmVals["utm_term"],
+		"utm_content":  utmVals["utm_content"],
+	}
+
 	data := LinkFormData{
 		PageData: h.pageData(w, r),
 		Link:     link,
 		Domains:  h.cfg.Domains,
 		Errors:   map[string]string{},
-		Values: map[string]string{
-			"destination": link.Destination,
-			"domain":      link.Domain,
-			"slug":        link.Slug,
-			"title":       link.Title,
-			"tags":        link.Tags,
-			"notes":       link.Notes,
-		},
+		Values:   values,
 	}
 	h.templates.Render(w, "templates/link_edit.html", data)
 }
@@ -258,12 +334,17 @@ func (h *AdminHandler) LinkUpdate(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 
 	values := map[string]string{
-		"destination": r.FormValue("destination"),
-		"domain":      r.FormValue("domain"),
-		"slug":        r.FormValue("slug"),
-		"title":       r.FormValue("title"),
-		"tags":        r.FormValue("tags"),
-		"notes":       r.FormValue("notes"),
+		"destination":  r.FormValue("destination"),
+		"domain":       r.FormValue("domain"),
+		"slug":         r.FormValue("slug"),
+		"title":        r.FormValue("title"),
+		"tags":         r.FormValue("tags"),
+		"notes":        r.FormValue("notes"),
+		"utm_source":   r.FormValue("utm_source"),
+		"utm_medium":   r.FormValue("utm_medium"),
+		"utm_campaign": r.FormValue("utm_campaign"),
+		"utm_term":     r.FormValue("utm_term"),
+		"utm_content":  r.FormValue("utm_content"),
 	}
 
 	errors := map[string]string{}
@@ -296,9 +377,17 @@ func (h *AdminHandler) LinkUpdate(w http.ResponseWriter, r *http.Request) {
 	// Capture old key for cache invalidation
 	oldDomain, oldSlug := existing.Domain, existing.Slug
 
+	utmValues := map[string]string{
+		"utm_source":   values["utm_source"],
+		"utm_medium":   values["utm_medium"],
+		"utm_campaign": values["utm_campaign"],
+		"utm_term":     values["utm_term"],
+		"utm_content":  values["utm_content"],
+	}
+
 	existing.Slug = values["slug"]
 	existing.Domain = domain
-	existing.Destination = values["destination"]
+	existing.Destination = buildDestinationWithUTM(values["destination"], utmValues)
 	existing.Title = values["title"]
 	existing.Tags = values["tags"]
 	existing.Notes = values["notes"]
